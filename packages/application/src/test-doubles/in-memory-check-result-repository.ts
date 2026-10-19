@@ -19,11 +19,22 @@ export class InMemoryCheckResultRepository implements CheckResultRepositoryPort 
     monitorId: UUIDv7 | string,
     limit: number,
     cursor?: string,
+    from?: Date,
+    to?: Date,
   ): Promise<CheckResult[]> {
     const key = monitorId.toString();
     let results = Array.from(this.checks.values()).filter(
       (check) => check.monitorId.toString() === key,
     );
+
+    if (from) {
+      const fromTime = from.getTime();
+      results = results.filter((c) => c.startedAt.getTime() >= fromTime);
+    }
+    if (to) {
+      const toTime = to.getTime();
+      results = results.filter((c) => c.startedAt.getTime() <= toTime);
+    }
 
     results.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
 
