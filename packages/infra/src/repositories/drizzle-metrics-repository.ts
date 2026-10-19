@@ -89,7 +89,8 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
         COUNT(*) FILTER (WHERE health_status = 'UP')::int AS up_count,
         COUNT(*) FILTER (WHERE health_status = 'DEGRADED')::int AS degraded_count,
         COUNT(*) FILTER (WHERE health_status = 'DOWN')::int AS down_count,
-        COUNT(*) FILTER (WHERE health_status = 'PAUSED' OR is_active = false)::int AS paused_count
+        COUNT(*) FILTER (WHERE health_status = 'PAUSED' OR is_active = false)::int AS paused_count,
+        COUNT(*) FILTER (WHERE health_status = 'UNKNOWN')::int AS unknown_count
       FROM monitors;
     `;
 
@@ -130,6 +131,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
       degradedCount: Number(monitorRow?.degraded_count ?? 0),
       downCount: Number(monitorRow?.down_count ?? 0),
       pausedCount: Number(monitorRow?.paused_count ?? 0),
+      unknownCount: Number(monitorRow?.unknown_count ?? 0),
       openIncidentsCount: Number(incidentRow?.open_incidents ?? 0),
       averageUptimePercentage:
         totalChecks > 0 ? Number(((successChecks / totalChecks) * 100).toFixed(2)) : null,
@@ -152,6 +154,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
         failed_checks: number;
         avg_latency_ms: number | null;
         p95_latency_ms: number | null;
+        p99_latency_ms: number | null;
       }>`
         SELECT 
           date_bin('5 minutes', executed_at, TIMESTAMPTZ '2026-01-01 00:00:00Z') AS bucket,
@@ -159,7 +162,8 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
           COUNT(*) FILTER (WHERE is_success = true)::integer AS success_checks,
           COUNT(*) FILTER (WHERE is_success = false)::integer AS failed_checks,
           ROUND(AVG(duration_ms) FILTER (WHERE is_success = true))::integer AS avg_latency_ms,
-          percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE is_success = true)::integer AS p95_latency_ms
+          percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE is_success = true)::integer AS p95_latency_ms,
+          percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE is_success = true)::integer AS p99_latency_ms
         FROM check_results
         WHERE monitor_id = ${monitorId}
           AND executed_at >= NOW() - INTERVAL '24 hours'
@@ -181,6 +185,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
         const failed = Number(row.failed_checks);
         const avgLat = row.avg_latency_ms !== null ? Number(row.avg_latency_ms) : null;
         const p95Lat = row.p95_latency_ms !== null ? Number(row.p95_latency_ms) : null;
+        const p99Lat = row.p99_latency_ms !== null ? Number(row.p99_latency_ms) : null;
 
         sumTotal += total;
         sumSuccess += success;
@@ -196,6 +201,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
           uptimePercentage: total > 0 ? Number(((success / total) * 100).toFixed(2)) : null,
           avgLatencyMs: success > 0 ? avgLat : null,
           p95LatencyMs: success > 0 ? p95Lat : null,
+          p99LatencyMs: success > 0 ? p99Lat : null,
         });
       }
 
@@ -220,13 +226,15 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
       success_checks: number;
       avg_latency_ms: number;
       p95_latency_ms: number;
+      p99_latency_ms: number;
     }>`
       SELECT 
         bucket,
         total_checks,
         success_checks,
         avg_latency_ms,
-        p95_latency_ms
+        p95_latency_ms,
+        p99_latency_ms
       FROM monitor_metrics_hourly
       WHERE monitor_id = ${monitorId}
         AND bucket >= NOW() - ${intervalSql}
@@ -246,6 +254,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
       const failed = total - success;
       const avgLat = Number(row.avg_latency_ms);
       const p95Lat = Number(row.p95_latency_ms);
+      const p99Lat = Number(row.p99_latency_ms);
 
       sumTotal += total;
       sumSuccess += success;
@@ -261,6 +270,7 @@ export class DrizzleMetricsRepository implements MetricsRepositoryPort {
         uptimePercentage: total > 0 ? Number(((success / total) * 100).toFixed(2)) : null,
         avgLatencyMs: success > 0 ? avgLat : null,
         p95LatencyMs: success > 0 ? p95Lat : null,
+        p99LatencyMs: success > 0 ? p99Lat : null,
       });
     }
 

@@ -91,7 +91,8 @@ export class DrizzleMonitorRepository implements MonitorRepositoryPort {
     }
 
     if (options.search?.trim()) {
-      conditions.push(ilike(monitors.name, `%${options.search.trim()}%`));
+      const term = `%${options.search.trim()}%`;
+      conditions.push(or(ilike(monitors.name, term), ilike(monitors.url, term)));
     }
 
     if (options.cursor) {
@@ -164,6 +165,17 @@ export class DrizzleMonitorRepository implements MonitorRepositoryPort {
         `Monitor ${id} mengalami konflik konkurensi versi (OCC mismatch).`,
       );
     }
+  }
+
+  public async updateNextRun(id: UUIDv7 | string, nextRunAt: Date, tx?: unknown): Promise<void> {
+    const targetDb = this.getDb(tx);
+    await targetDb
+      .update(monitors)
+      .set({
+        nextRunAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(monitors.id, id.toString()));
   }
 
   public async delete(id: UUIDv7 | string, tx?: unknown): Promise<boolean> {
