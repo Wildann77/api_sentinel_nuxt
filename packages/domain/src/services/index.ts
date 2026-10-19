@@ -3,6 +3,7 @@ export interface DomainService {
 }
 
 export * from "./assertion-engine.js";
+export * from "./csv-sanitizer.js";
 export * from "./diagnostic-sanitizer.js";
 export * from "./header-policy.js";
 export * from "./json-path.js";
