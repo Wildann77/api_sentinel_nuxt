@@ -24,6 +24,8 @@ export interface ExecuteScheduledCheckResult {
   readonly isSuccess?: boolean;
   readonly healthStatus?: string;
   readonly reason?: string;
+  readonly durationMs?: number | null;
+  readonly failureCategory?: string | null;
 }
 
 export interface ExecuteScheduledCheckUseCase {
@@ -34,10 +36,16 @@ export interface ListChecksFilter {
   readonly monitorId: string;
   readonly limit?: number;
   readonly cursor?: string;
+  readonly from?: string | Date;
+  readonly to?: string | Date;
 }
 
 export interface ListChecksQuery {
   execute(filter: ListChecksFilter): Promise<CursorPageDto<CheckResultDto>>;
+}
+
+export interface GetCheckDetailQuery {
+  execute(checkId: string): Promise<CheckDetailDto>;
 }
 
 export interface GetRecentChecksFilter {

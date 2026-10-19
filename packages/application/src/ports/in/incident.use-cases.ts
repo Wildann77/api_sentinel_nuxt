@@ -18,6 +18,8 @@ export interface GetIncidentQuery {
 export interface DispatchNotificationCommand {
   readonly incidentId: string;
   readonly type: "OPENED" | "RECOVERED";
+  readonly deliveryId?: string;
+  readonly monitorId?: string;
 }
 
 export interface DispatchNotificationUseCase {
