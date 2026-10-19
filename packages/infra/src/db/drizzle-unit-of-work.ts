@@ -1,13 +1,16 @@
 import type { UnitOfWorkPort } from "@sentinel/application";
 import { sql } from "drizzle-orm";
+import { withSpan } from "../telemetry/otel-tracer.js";
 import type { DrizzleDatabase } from "./connection.js";
 
 export class DrizzleUnitOfWorkAdapter implements UnitOfWorkPort {
   constructor(private readonly db: DrizzleDatabase) {}
 
   public async runInTransaction<T>(work: (tx: unknown) => Promise<T>): Promise<T> {
-    return await this.db.transaction(async (tx) => {
-      return await work(tx);
+    return await withSpan("db.transaction.save", {}, async () => {
+      return await this.db.transaction(async (tx) => {
+        return await work(tx);
+      });
     });
   }
 
