@@ -30,6 +30,42 @@ export const WebSocketEventSchema = z.discriminatedUnion("event", [
 ]);
 export type WebSocketEventDto = z.infer<typeof WebSocketEventSchema>;
 
+export const WebSocketPongEventSchema = z.object({
+  event: z.literal("pong"),
+  timestamp: z.string(),
+});
+export type WebSocketPongEventDto = z.infer<typeof WebSocketPongEventSchema>;
+
+export const WebSocketServerMessageSchema = z.union([
+  WebSocketEventSchema,
+  WebSocketPongEventSchema,
+]);
+export type WebSocketServerMessageDto = z.infer<typeof WebSocketServerMessageSchema>;
+
+export const WebSocketSubscribeMessageSchema = z.object({
+  action: z.literal("subscribe"),
+  monitorId: UuidSchema.optional(),
+});
+export type WebSocketSubscribeMessageDto = z.infer<typeof WebSocketSubscribeMessageSchema>;
+
+export const WebSocketUnsubscribeMessageSchema = z.object({
+  action: z.literal("unsubscribe"),
+  monitorId: UuidSchema.optional(),
+});
+export type WebSocketUnsubscribeMessageDto = z.infer<typeof WebSocketUnsubscribeMessageSchema>;
+
+export const WebSocketPingMessageSchema = z.object({
+  action: z.literal("ping"),
+});
+export type WebSocketPingMessageDto = z.infer<typeof WebSocketPingMessageSchema>;
+
+export const WebSocketClientMessageSchema = z.discriminatedUnion("action", [
+  WebSocketSubscribeMessageSchema,
+  WebSocketUnsubscribeMessageSchema,
+  WebSocketPingMessageSchema,
+]);
+export type WebSocketClientMessageDto = z.infer<typeof WebSocketClientMessageSchema>;
+
 export const SentinelNotifyPayloadSchema = z.object({
   channel: z.string(),
   event: z.string(),
