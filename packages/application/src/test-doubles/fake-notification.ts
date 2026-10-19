@@ -32,6 +32,17 @@ export class FakeNotification implements NotificationPort {
     this.queuedResults.push(result);
   }
 
+  public formatIncidentMessage(payload: {
+    readonly monitorName: string;
+    readonly type: "OPENED" | "RECOVERED";
+    readonly cause: string;
+    readonly openedAt: Date;
+    readonly recoveredAt?: Date | null;
+    readonly durationSeconds?: number | null;
+  }): string {
+    return `[${payload.type}] ${payload.monitorName}: ${payload.cause}`;
+  }
+
   public clear(): void {
     this.sentMessages = [];
     this.queuedResults = [];
