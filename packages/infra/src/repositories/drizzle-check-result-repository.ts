@@ -35,8 +35,17 @@ export class DrizzleCheckResultRepository implements CheckResultRepositoryPort {
     monitorId: UUIDv7 | string,
     limit: number,
     cursor?: string,
+    from?: Date,
+    to?: Date,
   ): Promise<CheckResult[]> {
     const conditions = [eq(checkResults.monitorId, monitorId.toString())];
+
+    if (from) {
+      conditions.push(gte(checkResults.executedAt, from));
+    }
+    if (to) {
+      conditions.push(lte(checkResults.executedAt, to));
+    }
 
     if (cursor) {
       const [cursorRow] = await this.db
