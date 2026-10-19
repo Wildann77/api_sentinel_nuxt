@@ -11,6 +11,7 @@ import {
 import type { ClockPort } from "../ports/out/clock.port.js";
 import type { IdGeneratorPort } from "../ports/out/id-generator.port.js";
 import type { NetworkProbePort, ProbeResult } from "../ports/out/network-probe.port.js";
+import type { TelemetryPort } from "../ports/out/telemetry.port.js";
 
 export interface ExecuteProbeCheckCommand {
   readonly monitorId: UUIDv7;
@@ -38,6 +39,7 @@ export class ProbeCheckOrchestrator {
     private readonly probe: NetworkProbePort,
     private readonly clock: ClockPort,
     private readonly idGenerator: IdGeneratorPort,
+    private readonly telemetry?: TelemetryPort,
   ) {}
 
   public async execute(command: ExecuteProbeCheckCommand): Promise<ProbeCheckOrchestrationResult> {
@@ -58,6 +60,38 @@ export class ProbeCheckOrchestrator {
     });
 
     const finishedAt = this.clock.now();
+
+    if (this.telemetry) {
+      if (probeResult.dnsDurationMs !== null) {
+        this.telemetry.recordSpan({
+          name: "probe.dns_lookup",
+          durationMs: probeResult.dnsDurationMs,
+        });
+      }
+      if (probeResult.connectDurationMs !== null) {
+        this.telemetry.recordSpan({
+          name: "probe.tcp_connect",
+          durationMs: probeResult.connectDurationMs,
+        });
+      }
+      if (probeResult.tlsDurationMs !== null) {
+        this.telemetry.recordSpan({
+          name: "probe.tls_handshake",
+          durationMs: probeResult.tlsDurationMs,
+        });
+      }
+      if (probeResult.durationMs !== null) {
+        const transferDurationMs = Math.max(
+          0,
+          probeResult.durationMs -
+            ((probeResult.connectDurationMs ?? 0) + (probeResult.tlsDurationMs ?? 0)),
+        );
+        this.telemetry.recordSpan({
+          name: "probe.response_transfer",
+          durationMs: transferDurationMs,
+        });
+      }
+    }
 
     const checkId = UUIDv7.fromString(this.idGenerator.generate());
     const correlationId = command.correlationId?.trim() || checkId.toString();
@@ -89,10 +123,17 @@ export class ProbeCheckOrchestrator {
     }
 
     // Skenario 2: Respons HTTP diterima, evaluasi assertions (PRD §4.5 langkah 9)
+    const assertionStart = this.clock.now().getTime();
     const assertionResult = evaluateAssertions(command.assertionRules, {
       statusCode: probeResult.statusCode ?? 200,
       headers: probeResult.headers,
       bodyText: probeResult.bodySnippet,
+    });
+    const assertionDurationMs = Math.max(0, this.clock.now().getTime() - assertionStart);
+    this.telemetry?.recordSpan({
+      name: "assertion.evaluation",
+      durationMs: assertionDurationMs,
+      attributes: { passed: assertionResult.passed },
     });
 
     const isSuccess = assertionResult.passed;
