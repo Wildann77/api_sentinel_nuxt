@@ -7,6 +7,7 @@ export * from "./fake-probe.js";
 export * from "./fake-pubsub.js";
 export * from "./fake-queue.js";
 export * from "./fake-rate-limiter.js";
+export * from "./fake-telemetry.js";
 export * from "./fake-unit-of-work.js";
 export * from "./in-memory-check-result-repository.js";
 export * from "./in-memory-incident-repository.js";
