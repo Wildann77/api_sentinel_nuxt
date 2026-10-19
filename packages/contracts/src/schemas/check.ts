@@ -6,7 +6,7 @@ import {
   HealthStatusSchema,
   TriggerTypeSchema,
 } from "../enums.js";
-import { UuidSchema } from "./common.js";
+import { createCursorPageSchema, UuidSchema } from "./common.js";
 
 export const AssertionResultSchema = z.object({
   type: AssertionTypeSchema,
@@ -48,4 +48,27 @@ export const CheckResultSchema = z.object({
 
 export const CheckDetailSchema = CheckResultSchema.extend({
   diagnostics: CheckDiagnosticsSchema,
+});
+
+export const ListChecksQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().optional(),
+  from: z
+    .string()
+    .datetime({ message: "Parameter from harus berupa ISO-8601 UTC datetime" })
+    .optional(),
+  to: z
+    .string()
+    .datetime({ message: "Parameter to harus berupa ISO-8601 UTC datetime" })
+    .optional(),
+});
+
+export const PaginatedChecksResponseSchema = createCursorPageSchema(CheckResultSchema);
+
+export const RecentChecksQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export const RecentChecksResponseSchema = z.object({
+  data: z.array(CheckResultSchema),
 });
