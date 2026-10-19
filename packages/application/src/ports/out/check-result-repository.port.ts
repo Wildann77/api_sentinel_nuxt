@@ -20,6 +20,8 @@ export interface CheckResultRepositoryPort {
     monitorId: UUIDv7 | string,
     limit: number,
     cursor?: string,
+    from?: Date,
+    to?: Date,
   ): Promise<CheckResult[]>;
   findRecent(limit: number): Promise<CheckResult[]>;
   findSparkline(monitorId: UUIDv7 | string, points?: number): Promise<SparklinePoint[]>;
