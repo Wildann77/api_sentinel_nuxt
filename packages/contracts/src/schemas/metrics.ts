@@ -10,6 +10,7 @@ export const MetricsSummarySchema = z.object({
   degradedCount: z.number().int(),
   downCount: z.number().int(),
   pausedCount: z.number().int(),
+  unknownCount: z.number().int().default(0),
   openIncidentsCount: z.number().int(),
   averageUptimePercentage: z.number().nullable(),
   averageLatencyMs: z.number().nullable(),
@@ -23,6 +24,7 @@ export const MonitorMetricBucketSchema = z.object({
   uptimePercentage: z.number().nullable(),
   avgLatencyMs: z.number().nullable(),
   p95LatencyMs: z.number().nullable(),
+  p99LatencyMs: z.number().nullable().optional(),
 });
 
 export const MonitorMetricsSchema = z.object({
@@ -44,4 +46,12 @@ export const CompositeLatencyPointSchema = z.object({
 export const CompositeLatencyMetricsSchema = z.object({
   range: MetricsRangeSchema,
   points: z.array(CompositeLatencyPointSchema),
+});
+
+export const GetMonitorMetricsQuerySchema = z.object({
+  range: MetricsRangeSchema.default("24h"),
+});
+
+export const GetCompositeLatencyQuerySchema = z.object({
+  range: MetricsRangeSchema.default("24h"),
 });
