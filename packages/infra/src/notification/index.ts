@@ -1,3 +1,2 @@
-export interface NotificationSender {
-  readonly channel: string;
-}
+export * from "./telegram-bot.adapter.js";
+export * from "./telegram-message.formatter.js";
