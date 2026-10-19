@@ -9,5 +9,6 @@ export * from "./pubsub/index.js";
 export * from "./queue/index.js";
 export * from "./repositories/index.js";
 export * from "./services/index.js";
+export * from "./telemetry/index.js";
 
 export const INFRA_VERSION = "0.1.0";
