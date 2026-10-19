@@ -16,5 +16,6 @@ export * from "./pubsub.port.js";
 export * from "./queue.port.js";
 export * from "./rate-limiter.port.js";
 export * from "./session-repository.port.js";
+export * from "./telemetry.port.js";
 export * from "./unit-of-work.port.js";
 export * from "./user-repository.port.js";
