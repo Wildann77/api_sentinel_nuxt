@@ -38,15 +38,16 @@ export class FakeProbe implements NetworkProbePort {
 
   public enqueueResponse(result: Partial<ProbeResult>): void {
     this.queuedResponses.push({
-      statusCode: result.statusCode ?? 200,
+      statusCode: result.statusCode !== undefined ? result.statusCode : 200,
       headers: result.headers ?? { "content-type": "application/json" },
-      bodySnippet: result.bodySnippet ?? '{"status":"ok"}',
-      durationMs: result.durationMs ?? 20,
-      dnsDurationMs: result.dnsDurationMs ?? 2,
-      connectDurationMs: result.connectDurationMs ?? 3,
-      tlsDurationMs: result.tlsDurationMs ?? 5,
-      firstByteDurationMs: result.firstByteDurationMs ?? 10,
-      pinnedIp: result.pinnedIp ?? "93.184.216.34",
+      bodySnippet: result.bodySnippet !== undefined ? result.bodySnippet : '{"status":"ok"}',
+      durationMs: result.durationMs !== undefined ? result.durationMs : 20,
+      dnsDurationMs: result.dnsDurationMs !== undefined ? result.dnsDurationMs : 2,
+      connectDurationMs: result.connectDurationMs !== undefined ? result.connectDurationMs : 3,
+      tlsDurationMs: result.tlsDurationMs !== undefined ? result.tlsDurationMs : 5,
+      firstByteDurationMs:
+        result.firstByteDurationMs !== undefined ? result.firstByteDurationMs : 10,
+      pinnedIp: result.pinnedIp !== undefined ? result.pinnedIp : "93.184.216.34",
       errorCategory: result.errorCategory ?? null,
       errorMessage: result.errorMessage ?? null,
     });
