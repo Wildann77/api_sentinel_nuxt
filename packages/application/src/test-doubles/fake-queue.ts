@@ -39,6 +39,16 @@ export class FakeQueue implements QueuePort {
     return id;
   }
 
+  public async cancel(queueName: string, singletonKeyOrJobId: string): Promise<void> {
+    this.jobs = this.jobs.filter(
+      (job) =>
+        !(
+          job.queueName === queueName &&
+          (job.id === singletonKeyOrJobId || job.options?.singletonKey === singletonKeyOrJobId)
+        ),
+    );
+  }
+
   public findJobs<T = unknown>(queueName?: string): EnqueuedJob<T>[] {
     if (!queueName) {
       return this.jobs as EnqueuedJob<T>[];
