@@ -24,5 +24,6 @@ export interface MonitorRepositoryPort {
   findWithFilter(options: MonitorFilterOptions): Promise<PaginatedMonitors>;
   save(monitor: Monitor, tx?: unknown): Promise<void>;
   update(monitor: Monitor, tx?: unknown): Promise<void>;
+  updateNextRun(id: UUIDv7 | string, nextRunAt: Date, tx?: unknown): Promise<void>;
   delete(id: UUIDv7 | string, tx?: unknown): Promise<boolean>;
 }

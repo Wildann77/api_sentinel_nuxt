@@ -23,5 +23,6 @@ export interface CheckResultRepositoryPort {
   ): Promise<CheckResult[]>;
   findRecent(limit: number): Promise<CheckResult[]>;
   findSparkline(monitorId: UUIDv7 | string, points?: number): Promise<SparklinePoint[]>;
+  findByIncidentId(incidentId: UUIDv7 | string, limit?: number): Promise<CheckResult[]>;
   streamChecks(filter: CheckStreamFilter): AsyncIterable<CheckResult>;
 }
