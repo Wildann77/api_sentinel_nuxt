@@ -58,14 +58,26 @@ export interface TestMonitorConfigUseCase {
 
 export interface ListMonitorsFilter {
   readonly search?: string;
-  readonly status?: HealthStatus;
+  readonly status?: HealthStatus | "ALL";
   readonly isActive?: boolean;
+  readonly limit?: number;
+  readonly cursor?: string;
 }
 
-export interface ListMonitorsQuery {
-  execute(filter?: ListMonitorsFilter): Promise<readonly MonitorResponseDto[]>;
+export interface PaginatedMonitorsResult {
+  readonly items: readonly MonitorResponseDto[];
+  readonly limit: number;
+  readonly hasMore: boolean;
+  readonly nextCursor?: string;
 }
 
-export interface GetMonitorQuery {
+export interface ListMonitorsUseCase {
+  execute(filter?: ListMonitorsFilter): Promise<PaginatedMonitorsResult>;
+}
+
+export interface GetMonitorUseCase {
   execute(id: string): Promise<MonitorResponseDto>;
 }
+
+export type ListMonitorsQuery = ListMonitorsUseCase;
+export type GetMonitorQuery = GetMonitorUseCase;

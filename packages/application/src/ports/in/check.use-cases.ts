@@ -11,12 +11,23 @@ export interface ExecuteManualCheckUseCase {
 
 export interface ExecuteScheduledCheckCommand {
   readonly monitorId: string;
-  readonly scheduledFor: string;
-  readonly correlationId?: string;
+  readonly scheduledFor?: string | Date | null;
+  readonly correlationId?: string | null;
+  readonly traceparent?: string | null;
+  readonly checkId?: string | null;
+  readonly triggerType?: "SCHEDULED" | "MANUAL";
+}
+
+export interface ExecuteScheduledCheckResult {
+  readonly status: "EXECUTED" | "SKIPPED";
+  readonly checkResultId?: string;
+  readonly isSuccess?: boolean;
+  readonly healthStatus?: string;
+  readonly reason?: string;
 }
 
 export interface ExecuteScheduledCheckUseCase {
-  execute(command: ExecuteScheduledCheckCommand): Promise<void>;
+  execute(command: ExecuteScheduledCheckCommand): Promise<ExecuteScheduledCheckResult>;
 }
 
 export interface ListChecksFilter {
