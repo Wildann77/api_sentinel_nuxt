@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CompositeLatencyMetricsSchema,
   IncidentSchema,
+  ListIncidentsQuerySchema,
   MetricsSummarySchema,
   MonitorMetricsSchema,
 } from "../src/index.js";
@@ -31,6 +32,43 @@ describe("Incident & Metrics Schemas", () => {
         createdAt: new Date().toISOString(),
       });
       expect(result.success).toBe(true);
+    });
+
+    it("validates incident with status and checks (P10.1)", () => {
+      const result = IncidentSchema.safeParse({
+        id: "0192e21b-8a21-7000-8b1a-98df76123456",
+        monitorId: "0192e21b-8a21-7000-8b1a-98df76123457",
+        monitorName: "Production API",
+        openedAt: new Date().toISOString(),
+        resolvedAt: null,
+        durationSeconds: null,
+        failureCount: 3,
+        lastFailureCategory: "CONNECTION_REFUSED",
+        lastFailureReason: "ECONNREFUSED",
+        status: "RECOVERING",
+        notificationDeliveries: [],
+        checks: [],
+        createdAt: new Date().toISOString(),
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.status).toBe("RECOVERING");
+        expect(result.data.monitorName).toBe("Production API");
+      }
+    });
+
+    it("validates ListIncidentsQuerySchema parameter coercion", () => {
+      const parsed = ListIncidentsQuerySchema.safeParse({
+        isOpen: "true",
+        limit: "25",
+        cursor: "0192e21b-8a21-7000-8b1a-98df76123456",
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.isOpen).toBe(true);
+        expect(parsed.data.limit).toBe(25);
+        expect(parsed.data.cursor).toBe("0192e21b-8a21-7000-8b1a-98df76123456");
+      }
     });
   });
 
