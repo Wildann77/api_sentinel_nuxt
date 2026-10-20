@@ -85,6 +85,15 @@ export class InMemoryCheckResultRepository implements CheckResultRepositoryPort 
     }
   }
 
+  public async findByIncidentId(incidentId: UUIDv7 | string, limit = 50): Promise<CheckResult[]> {
+    const key = incidentId.toString();
+    const results = Array.from(this.checks.values()).filter(
+      (c) => c.incidentId?.toString() === key,
+    );
+    results.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
+    return results.slice(0, Math.max(0, limit));
+  }
+
   public clear(): void {
     this.checks.clear();
   }

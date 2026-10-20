@@ -80,6 +80,13 @@ export class InMemoryMonitorRepository implements MonitorRepositoryPort {
     this.monitors.set(monitor.id.toString(), monitor);
   }
 
+  public async updateNextRun(id: UUIDv7 | string, nextRunAt: Date, _tx?: unknown): Promise<void> {
+    const monitor = this.monitors.get(id.toString());
+    if (monitor) {
+      monitor.nextRunAt = nextRunAt;
+    }
+  }
+
   public async delete(id: UUIDv7 | string, _tx?: unknown): Promise<boolean> {
     return this.monitors.delete(id.toString());
   }
