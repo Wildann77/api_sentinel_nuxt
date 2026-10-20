@@ -1,3 +1,4 @@
+export { sql } from "drizzle-orm";
 export * from "./connection.js";
 export * from "./drizzle-unit-of-work.js";
 export * from "./migrate.js";

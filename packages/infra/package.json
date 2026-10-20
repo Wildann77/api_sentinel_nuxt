@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run ./src/db/migrate.ts",
-    "owner:create": "echo 'owner:create ready'",
+    "owner:create": "bun run ./src/cli/owner-create.ts",
     "secrets:reencrypt": "bun run ./src/crypto/secrets-reencrypt.ts"
   },
   "dependencies": {

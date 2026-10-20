@@ -80,6 +80,19 @@ export class DrizzleCheckResultRepository implements CheckResultRepositoryPort {
     return rows.map((r) => CheckResultMapper.toDomain(r));
   }
 
+  public async findByIncidentId(incidentId: UUIDv7 | string, limit = 50): Promise<CheckResult[]> {
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+
+    const rows = await this.db
+      .select()
+      .from(checkResults)
+      .where(eq(checkResults.incidentId, incidentId.toString()))
+      .orderBy(desc(checkResults.executedAt), desc(checkResults.id))
+      .limit(safeLimit);
+
+    return rows.map((r) => CheckResultMapper.toDomain(r));
+  }
+
   public async findSparkline(monitorId: UUIDv7 | string, points = 20): Promise<SparklinePoint[]> {
     const safePoints = Math.min(Math.max(1, points), 100);
 

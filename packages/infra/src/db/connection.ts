@@ -5,6 +5,8 @@ import * as schema from "./schema/index.js";
 const { Pool, Client } = pg;
 
 export type DrizzleDatabase = NodePgDatabase<typeof schema>;
+export type PgPool = pg.Pool;
+export type PgClient = pg.Client;
 
 export interface PgPoolConfig {
   readonly connectionString?: string;
