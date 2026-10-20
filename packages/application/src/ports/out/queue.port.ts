@@ -13,4 +13,5 @@ export interface QueuePort {
     payload: T,
     options?: QueueSendOptions,
   ): Promise<string | null>;
+  cancel(queueName: string, singletonKeyOrJobId: string): Promise<void>;
 }

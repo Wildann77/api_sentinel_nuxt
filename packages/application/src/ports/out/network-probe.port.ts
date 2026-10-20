@@ -1,11 +1,13 @@
-import type { FailureCategory } from "@sentinel/domain";
+import type { AuthConfig, FailureCategory } from "@sentinel/domain";
 
 export interface ProbeRequest {
   readonly url: string;
   readonly method: string;
   readonly headers?: Record<string, string>;
   readonly body?: string;
+  readonly authConfig?: AuthConfig | null;
   readonly timeoutMs: number;
+  readonly needsResponseBody?: boolean;
 }
 
 export interface ProbeResult {
