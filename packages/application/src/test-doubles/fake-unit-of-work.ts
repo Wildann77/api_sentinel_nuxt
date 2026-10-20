@@ -26,10 +26,17 @@ export class FakeUnitOfWork implements UnitOfWorkPort {
     }
   }
 
+  public readonly notifications: Array<{ channel: string; payload: string; tx: unknown }> = [];
+
+  public async notify(tx: unknown, channel: string, payload: string): Promise<void> {
+    this.notifications.push({ tx, channel, payload });
+  }
+
   public reset(): void {
     this.transactionCount = 0;
     this.committedCount = 0;
     this.rolledBackCount = 0;
     this.simulateRollback = false;
+    this.notifications.length = 0;
   }
 }
