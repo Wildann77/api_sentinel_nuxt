@@ -368,6 +368,10 @@ export function isAllowed(ipOrHost: string): boolean {
   return findBlockedReason(ipOrHost) === null;
 }
 
+export function isBlocked(ipOrHost: string): boolean {
+  return findBlockedReason(ipOrHost) !== null;
+}
+
 export function assertAllowed(ips: string | readonly string[]): void {
   const list = Array.isArray(ips) ? ips : [ips as string];
   for (const ip of list) {
@@ -382,6 +386,7 @@ export const NetworkPolicy = {
   isLocalhost,
   findBlockedReason,
   isAllowed,
+  isBlocked,
   assertAllowed,
 } as const;
 export type NetworkPolicy = typeof NetworkPolicy;
