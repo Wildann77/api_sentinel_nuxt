@@ -1,0 +1,111 @@
+import { describe, expect, it } from "vitest";
+import type {
+  AuthenticateUserUseCase,
+  ChangeOwnerPasswordUseCase,
+  CheckResultRepositoryPort,
+  CipherPort,
+  ClockPort,
+  CreateMonitorUseCase,
+  DeleteMonitorUseCase,
+  DispatchNotificationUseCase,
+  ExecuteManualCheckUseCase,
+  ExecuteScheduledCheckUseCase,
+  GetCompositeLatencyMetricsUseCase,
+  GetIncidentQuery,
+  GetMetricsSummaryUseCase,
+  GetMonitorMetricsUseCase,
+  GetMonitorQuery,
+  GetRecentChecksQuery,
+  GetTelegramSettingsQuery,
+  IdGeneratorPort,
+  IncidentRepositoryPort,
+  ListChecksQuery,
+  ListIncidentsQuery,
+  ListMonitorsQuery,
+  LoggerPort,
+  MetricsRepositoryPort,
+  MonitorRepositoryPort,
+  NetworkProbePort,
+  NotificationConfigRepositoryPort,
+  NotificationDeliveryRepositoryPort,
+  NotificationPort,
+  PasswordHasherPort,
+  PauseMonitorUseCase,
+  PubSubPort,
+  QueuePort,
+  RateLimiterPort,
+  ResumeMonitorUseCase,
+  RevokeSessionUseCase,
+  SessionRepositoryPort,
+  StreamCsvReportUseCase,
+  TestMonitorConfigUseCase,
+  TestTelegramNotificationUseCase,
+  UnitOfWorkPort,
+  UpdateMonitorUseCase,
+  UpdateTelegramSettingsUseCase,
+  UserRepositoryPort,
+  ValidateSessionUseCase,
+} from "../src/index.js";
+
+export type OutboundPorts = [
+  MonitorRepositoryPort,
+  IncidentRepositoryPort,
+  CheckResultRepositoryPort,
+  SessionRepositoryPort,
+  UserRepositoryPort,
+  NotificationConfigRepositoryPort,
+  NotificationDeliveryRepositoryPort,
+  MetricsRepositoryPort,
+  NetworkProbePort,
+  CipherPort,
+  QueuePort,
+  PubSubPort,
+  RateLimiterPort,
+  PasswordHasherPort,
+  IdGeneratorPort,
+  ClockPort,
+  UnitOfWorkPort,
+  LoggerPort,
+  NotificationPort,
+];
+
+export type InboundPorts = [
+  AuthenticateUserUseCase,
+  RevokeSessionUseCase,
+  ValidateSessionUseCase,
+  ChangeOwnerPasswordUseCase,
+  CreateMonitorUseCase,
+  UpdateMonitorUseCase,
+  PauseMonitorUseCase,
+  ResumeMonitorUseCase,
+  DeleteMonitorUseCase,
+  TestMonitorConfigUseCase,
+  ExecuteManualCheckUseCase,
+  ExecuteScheduledCheckUseCase,
+  DispatchNotificationUseCase,
+  UpdateTelegramSettingsUseCase,
+  TestTelegramNotificationUseCase,
+  ListMonitorsQuery,
+  GetMonitorQuery,
+  ListChecksQuery,
+  GetRecentChecksQuery,
+  ListIncidentsQuery,
+  GetIncidentQuery,
+  GetMetricsSummaryUseCase,
+  GetMonitorMetricsUseCase,
+  GetCompositeLatencyMetricsUseCase,
+  GetTelegramSettingsQuery,
+  StreamCsvReportUseCase,
+];
+
+describe("Application Ports Contract & Traceability (ARCH §4, §12.1)", () => {
+  it("compiles and asserts outbound ports type definitions", () => {
+    const outboundCheck: OutboundPorts | null = null;
+    expect(outboundCheck).toBeNull();
+  });
+
+  it("compiles and asserts inbound ports type definitions (ARCH §4.1 + D-09, D-10, D-18, D-19)", () => {
+    const inboundCheck: InboundPorts | null = null;
+    expect(inboundCheck).toBeNull();
+  });
+});
