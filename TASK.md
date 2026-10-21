@@ -224,9 +224,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** fondasi tipe domain.
 
-- [ ] `DomainException` abstrak + `EntityNotFound`, `Validation` (dengan `invalidParams`), `SSRFBlocked`, `InvalidCredentials`, `Conflict`, `RateLimitExceeded` (`retryAfterSeconds`), `Forbidden` (ARCH §9.1.A).
-- [ ] Enum `HttpMethod`, `HealthStatus`, `FailureCategory` (11 nilai ARCH §6.1 + `REDIRECT_NOT_ALLOWED` per D-14), `TriggerType` (D-13).
-- [ ] Value object `UUIDv7` (validasi format, perbandingan, ekstraksi waktu).
+- [x] `DomainException` abstrak + `EntityNotFound`, `Validation` (dengan `invalidParams`), `SSRFBlocked`, `InvalidCredentials`, `Conflict`, `RateLimitExceeded` (`retryAfterSeconds`), `Forbidden` (ARCH §9.1.A).
+- [x] Enum `HttpMethod`, `HealthStatus`, `FailureCategory` (11 nilai ARCH §6.1 + `REDIRECT_NOT_ALLOWED` per D-14), `TriggerType` (D-13).
+- [x] Value object `UUIDv7` (validasi format, perbandingan, ekstraksi waktu).
 
 **Selesai bila:** unit test memverifikasi status code & errorType tiap exception.
 **Ref:** ARCH §3, §9.1.
@@ -235,11 +235,11 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** logika blokir jaringan tanpa I/O, dipakai domain dan probe infra.
 
-- [ ] Konstanta `BLOCKED_CIDR_RANGES` lengkap (IPv4 15 entri + IPv6 9 entri, ARCH §5.1.A).
-- [ ] Parser IPv4/IPv6 sendiri (tanpa dependensi), cek keanggotaan CIDR.
-- [ ] Normalisasi IPv4-mapped IPv6 (`::ffff:a.b.c.d`), evaluasi NAT64 `64:ff9b::/96` dan 6to4 `2002::/16`.
-- [ ] Parser literal IP numerik non-standar (desimal, hex, octal, singkatan) sebelum cek CIDR.
-- [ ] Fungsi `assertAllowed(ips[])`: tolak bila SALAH SATU IP terblokir → `SSRFBlockedException`.
+- [x] Konstanta `BLOCKED_CIDR_RANGES` lengkap (IPv4 15 entri + IPv6 9 entri, ARCH §5.1.A).
+- [x] Parser IPv4/IPv6 sendiri (tanpa dependensi), cek keanggotaan CIDR.
+- [x] Normalisasi IPv4-mapped IPv6 (`::ffff:a.b.c.d`), evaluasi NAT64 `64:ff9b::/96` dan 6to4 `2002::/16`.
+- [x] Parser literal IP numerik non-standar (desimal, hex, octal, singkatan) sebelum cek CIDR.
+- [x] Fungsi `assertAllowed(ips[])`: tolak bila SALAH SATU IP terblokir → `SSRFBlockedException`.
 
 **Selesai bila:** tiap CIDR diuji (alamat di dalam & di luar batas) dengan cakupan 100%.
 **Ref:** ARCH §5.1, PRD §4.8.
@@ -248,10 +248,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** validasi URL target di sisi domain.
 
-- [ ] Hanya skema `http`/`https`; tolak userinfo (`user:pass@`); tolak host kosong; dukung IPv6 berkurung.
-- [ ] Jika hostname adalah IP literal, jalankan `NetworkPolicy`.
-- [ ] Batas panjang URL; normalisasi (tanpa mengubah semantik).
-- [ ] Pesan error `ValidationException` dengan `invalidParams` (contoh ARCH §9.1.C).
+- [x] Hanya skema `http`/`https`; tolak userinfo (`user:pass@`); tolak host kosong; dukung IPv6 berkurung.
+- [x] Jika hostname adalah IP literal, jalankan `NetworkPolicy`.
+- [x] Batas panjang URL; normalisasi (tanpa mengubah semantik).
+- [x] Pesan error `ValidationException` dengan `invalidParams` (contoh ARCH §9.1.C).
 
 **Selesai bila:** unit test mencakup literal desimal/hex/octal, `[::1]`, `localhost`, userinfo, skema `ftp`.
 **Ref:** ARCH §5.1, PRD §4.4/§4.8.
@@ -260,10 +260,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** representasi ciphertext dan aturan header.
 
-- [ ] `EncryptedSecret.parse()` format `v1:<keyId>:<hexNonce 48>:<hexCtMac>`; tolak format salah.
-- [ ] `HeaderPolicy`: deny-list `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Keep-Alive`, `Upgrade`, `Proxy-Authorization` (case-insensitive).
-- [ ] Ekstraktor `headerKeys` (nama header saja) untuk kolom `header_keys`.
-- [ ] Definisi `AuthConfig` (None, Bearer, Basic, ApiKey, CustomHeader) dengan validasi kelengkapan (US 7).
+- [x] `EncryptedSecret.parse()` format `v1:<keyId>:<hexNonce 48>:<hexCtMac>`; tolak format salah.
+- [x] `HeaderPolicy`: deny-list `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Keep-Alive`, `Upgrade`, `Proxy-Authorization` (case-insensitive).
+- [x] Ekstraktor `headerKeys` (nama header saja) untuk kolom `header_keys`.
+- [x] Definisi `AuthConfig` (None, Bearer, Basic, ApiKey, CustomHeader) dengan validasi kelengkapan (US 7).
 
 **Selesai bila:** unit test lolos untuk tiap tipe auth dan deny-list.
 **Ref:** ARCH §3.2, §5.1.B, §5.2; PRD §4.6.
@@ -272,10 +272,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** model aturan validasi respons.
 
-- [ ] Tipe aturan: `status`, `header` (`exists/equals/contains`), `body-json` (`exists/equals/contains`) sesuai D-15.
-- [ ] Batas: maks 10 aturan gabungan per monitor; query JSONPath ≤ 100 karakter.
-- [ ] Nilai ekspektasi bertipe (`string|number|boolean`); tanpa konversi implisit.
-- [ ] Nama header dibandingkan case-insensitive.
+- [x] Tipe aturan: `status`, `header` (`exists/equals/contains`), `body-json` (`exists/equals/contains`) sesuai D-15.
+- [x] Batas: maks 10 aturan gabungan per monitor; query JSONPath ≤ 100 karakter.
+- [x] Nilai ekspektasi bertipe (`string|number|boolean`); tanpa konversi implisit.
+- [x] Nama header dibandingkan case-insensitive.
 
 **Selesai bila:** aturan ke-11 ditolak; query 101 karakter ditolak.
 **Ref:** ARCH §3.2/§3.3, PRD §4.7.
@@ -284,12 +284,12 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** domain service evaluasi respons (mitigasi CVE-2024-21534/CVE-2025-1302).
 
-- [ ] Rancang & dokumentasikan grammar subset JSONPath (D-16); recursive-descent parser menghasilkan AST.
-- [ ] Evaluator AST murni; tanpa `eval()`/`Function()`; tolak `?()`/`()` script.
-- [ ] Evaluasi status HTTP, header, body JSON; hasil per aturan `AssertionExecutionResult` (`PASS/FAIL` + alasan, contoh `Expected "active", received "pending"`).
-- [ ] Perbandingan tipe ketat (`123` ≠ `"123"`); `contains` untuk string dan array.
-- [ ] Kasus gagal bernama: JSON tidak valid, JSONPath tidak dapat diproses, nilai tidak ada.
-- [ ] Sukses hanya bila semua aturan aktif lulus (PRD §4.7).
+- [x] Rancang & dokumentasikan grammar subset JSONPath (D-16); recursive-descent parser menghasilkan AST.
+- [x] Evaluator AST murni; tanpa `eval()`/`Function()`; tolak `?()`/`()` script.
+- [x] Evaluasi status HTTP, header, body JSON; hasil per aturan `AssertionExecutionResult` (`PASS/FAIL` + alasan, contoh `Expected "active", received "pending"`).
+- [x] Perbandingan tipe ketat (`123` ≠ `"123"`); `contains` untuk string dan array.
+- [x] Kasus gagal bernama: JSON tidak valid, JSONPath tidak dapat diproses, nilai tidak ada.
+- [x] Sukses hanya bila semua aturan aktif lulus (PRD §4.7).
 
 **Selesai bila:** unit test: status/header/JSONPath, JSON invalid, tipe ketat, serangan injeksi (`$..[?(@.constructor...)]`) ditolak.
 **Ref:** ARCH §3.3, PRD §4.7/§5.1.
@@ -298,9 +298,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** catatan historis immutable.
 
-- [ ] Entity `CheckResult` (field ARCH §3.2 + `triggerType`, `scheduledFor`, `startedAt`, `finishedAt`, `correlationId`, `pinnedIp`, `diagnostics` per D-11/D-12/D-13).
-- [ ] Sanitizer `sanitizedDiagnostic`: redaksi token Telegram, header `Authorization`, API key, payload kredensial; batas panjang.
-- [ ] Latency `null` bila gagal sebelum request dimulai (PRD §4.12); tidak pernah `0` palsu.
+- [x] Entity `CheckResult` (field ARCH §3.2 + `triggerType`, `scheduledFor`, `startedAt`, `finishedAt`, `correlationId`, `pinnedIp`, `diagnostics` per D-11/D-12/D-13).
+- [x] Sanitizer `sanitizedDiagnostic`: redaksi token Telegram, header `Authorization`, API key, payload kredensial; batas panjang.
+- [x] Latency `null` bila gagal sebelum request dimulai (PRD §4.12); tidak pernah `0` palsu.
 
 **Selesai bila:** unit test: redaksi dan latency null.
 **Ref:** ARCH §3.2, PRD §4.10/§4.12.
@@ -309,14 +309,14 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** state machine kesehatan dan invarian (jantung domain).
 
-- [ ] Atribut ARCH §3.2 (termasuk `version`, `nextRunAt`, `currentIncidentId`).
-- [ ] Validasi pembuatan: nama ≤ 100, interval 60–86.400, timeout 1.000–30.000, aturan ≤ 10.
-- [ ] `recordCheckFailure`: DEGRADED (<3), DOWN + buka insiden di ≥3, update `failureCount` saat sudah DOWN, reset `consecutiveSuccesses`.
-- [ ] `recordCheckSuccess`: reset kegagalan; DOWN tetap bila <2 sukses; UP + `IncidentRecovered` di ≥2; non-DOWN → UP.
-- [ ] `pause()` (insiden tetap terbuka), `resume()` (→ `UNKNOWN`, `nextRunAt = now`).
-- [ ] `computeNextRun(clock, jitter ±5%)` tanpa catch-up burst (PRD §4.9).
-- [ ] Manual check tidak memanggil `recordCheck*` (D-13).
-- [ ] Menghasilkan domain event bertipe.
+- [x] Atribut ARCH §3.2 (termasuk `version`, `nextRunAt`, `currentIncidentId`).
+- [x] Validasi pembuatan: nama ≤ 100, interval 60–86.400, timeout 1.000–30.000, aturan ≤ 10.
+- [x] `recordCheckFailure`: DEGRADED (<3), DOWN + buka insiden di ≥3, update `failureCount` saat sudah DOWN, reset `consecutiveSuccesses`.
+- [x] `recordCheckSuccess`: reset kegagalan; DOWN tetap bila <2 sukses; UP + `IncidentRecovered` di ≥2; non-DOWN → UP.
+- [x] `pause()` (insiden tetap terbuka), `resume()` (→ `UNKNOWN`, `nextRunAt = now`).
+- [x] `computeNextRun(clock, jitter ±5%)` tanpa catch-up burst (PRD §4.9).
+- [x] Manual check tidak memanggil `recordCheck*` (D-13).
+- [x] Menghasilkan domain event bertipe.
 
 **Selesai bila:** tabel state transition diuji penuh: 1–2 gagal, gagal ke-3, gagal saat DOWN, 1 sukses lalu gagal (reset), 2 sukses, pause saat DOWN, resume.
 **Ref:** ARCH §3.2, PRD §4.13/§4.14/§5.1, US 21–25.
@@ -325,9 +325,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** siklus hidup insiden.
 
-- [ ] Entity `Incident` (field ARCH §3.2): `open`, `registerFailure`, `resolve` (hitung `durationSeconds`).
-- [ ] `IncidentOpenedEvent`, `IncidentRecoveredEvent`, event update `failureCount`.
-- [ ] Invarian satu insiden terbuka per monitor (diperkuat DB di F4).
+- [x] Entity `Incident` (field ARCH §3.2): `open`, `registerFailure`, `resolve` (hitung `durationSeconds`).
+- [x] `IncidentOpenedEvent`, `IncidentRecoveredEvent`, event update `failureCount`.
+- [x] Invarian satu insiden terbuka per monitor (diperkuat DB di F4).
 
 **Selesai bila:** unit test durasi, resolve ganda ditolak.
 **Ref:** ARCH §3.2, PRD §4.14.
@@ -336,9 +336,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** aturan metrik terdokumentasi dan teruji (PRD §5.1).
 
-- [ ] `calculateUptime(success, total)` → `null` (N/A) bila `total = 0`; 100% tidak pernah dihasilkan tanpa data.
-- [ ] Penggabung bucket (untuk rollup per jam): total, sukses, rata-rata berbobot.
-- [ ] Dokumentasikan aturan: hanya pemeriksaan `SCHEDULED` yang layak; PAUSED & jadwal terlewat tidak dihitung.
+- [x] `calculateUptime(success, total)` → `null` (N/A) bila `total = 0`; 100% tidak pernah dihasilkan tanpa data.
+- [x] Penggabung bucket (untuk rollup per jam): total, sukses, rata-rata berbobot.
+- [x] Dokumentasikan aturan: hanya pemeriksaan `SCHEDULED` yang layak; PAUSED & jadwal terlewat tidak dihitung.
 
 **Selesai bila:** unit test: 97/100 = 97%; 0 data → N/A.
 **Ref:** PRD §4.11/§4.12.
@@ -351,10 +351,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** kontrak bersama client–web–worker (Standard Schema-compliant).
 
-- [ ] DTO + skema untuk: Auth (login, me, change password), Monitor (create/update/response TANPA rahasia, `headerKeys`, `authType`, `version`, `sparkline`), Check, CheckDetail (diagnostics), Incident (+ ringkasan notifikasi), Metrics (summary, per-monitor bucket, latency komposit), Telegram settings, ReportQuery.
-- [ ] `ProblemDetails` (RFC 9457) dan `CursorPage<T>` (`limit`, `hasMore`, `nextCursor`).
-- [ ] Payload event `CHECK_COMPLETED`, `INCIDENT_TRANSITION` (ARCH §9.4) dan payload NOTIFY (< 8.000 byte).
-- [ ] Skema `invalidParams` selaras `ValidationException`.
+- [x] DTO + skema untuk: Auth (login, me, change password), Monitor (create/update/response TANPA rahasia, `headerKeys`, `authType`, `version`, `sparkline`), Check, CheckDetail (diagnostics), Incident (+ ringkasan notifikasi), Metrics (summary, per-monitor bucket, latency komposit), Telegram settings, ReportQuery.
+- [x] `ProblemDetails` (RFC 9457) dan `CursorPage<T>` (`limit`, `hasMore`, `nextCursor`).
+- [x] Payload event `CHECK_COMPLETED`, `INCIDENT_TRANSITION` (ARCH §9.4) dan payload NOTIFY (< 8.000 byte).
+- [x] Skema `invalidParams` selaras `ValidationException`.
 
 **Selesai bila:** tiap skema punya tes valid/invalid; paket tidak mengimpor domain/infra.
 **Ref:** ARCH §2, §7.2, §9.
@@ -363,17 +363,17 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** semua antarmuka I/O di `application/ports/out`.
 
-- [ ] Repository: `MonitorRepositoryPort`, `IncidentRepositoryPort`, `CheckResultRepositoryPort`, `SessionRepositoryPort`, `UserRepositoryPort`, `NotificationConfigRepositoryPort`, `NotificationDeliveryRepositoryPort`.
-- [ ] Layanan: `NetworkProbePort`, `CipherPort`, `QueuePort`, `PubSubPort`, `RateLimiterPort`, `PasswordHasherPort`, `IdGeneratorPort`, `ClockPort`, `UnitOfWorkPort`, `LoggerPort`.
-- [ ] Tambahan hasil D-nn: `NotificationPort` (Telegram), `MetricsRepositoryPort`/query port untuk rollup & agregasi.
+- [x] Repository: `MonitorRepositoryPort`, `IncidentRepositoryPort`, `CheckResultRepositoryPort`, `SessionRepositoryPort`, `UserRepositoryPort`, `NotificationConfigRepositoryPort`, `NotificationDeliveryRepositoryPort`.
+- [x] Layanan: `NetworkProbePort`, `CipherPort`, `QueuePort`, `PubSubPort`, `RateLimiterPort`, `PasswordHasherPort`, `IdGeneratorPort`, `ClockPort`, `UnitOfWorkPort`, `LoggerPort`.
+- [x] Tambahan hasil D-nn: `NotificationPort` (Telegram), `MetricsRepositoryPort`/query port untuk rollup & agregasi.
 
 **Selesai bila:** semua port terdokumentasi (kontrak error & idempotensi).
 **Ref:** ARCH §4.2, §12.1.
 
 ### P3.3 — Inbound ports (use case interfaces)
 
-- [ ] Antarmuka untuk 13 use case ARCH §4.1 + `ChangeOwnerPasswordUseCase` (D-09), `TestMonitorConfigUseCase` (D-10), `ListMonitorsQuery`, `GetMonitorQuery`, `ListChecksQuery`, `ListIncidentsQuery`, `GetIncidentQuery`, `GetRecentChecksQuery`, `ValidateSessionUseCase`.
-- [ ] Konvensi `<Verb><Noun>UseCase`; tipe Command vs Query.
+- [x] Antarmuka untuk 13 use case ARCH §4.1 + `ChangeOwnerPasswordUseCase` (D-09), `TestMonitorConfigUseCase` (D-10), `ListMonitorsQuery`, `GetMonitorQuery`, `ListChecksQuery`, `ListIncidentsQuery`, `GetIncidentQuery`, `GetRecentChecksQuery`, `ValidateSessionUseCase`.
+- [x] Konvensi `<Verb><Noun>UseCase`; tipe Command vs Query.
 
 **Selesai bila:** daftar port cocok dengan matriks traceability ARCH §12.1.
 
@@ -381,7 +381,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** fake untuk semua port agar use case dapat diuji cepat.
 
-- [ ] `InMemory*Repository`, `FakeClock`, `SequentialIdGenerator`, `FakeCipher`, `FakeProbe` (skrip respons), `FakeQueue`, `FakeUnitOfWork` (rollback simulasi), `FakeRateLimiter`.
+- [x] `InMemory*Repository`, `FakeClock`, `SequentialIdGenerator`, `FakeCipher`, `FakeProbe` (skrip respons), `FakeQueue`, `FakeUnitOfWork` (rollback simulasi), `FakeRateLimiter`.
 
 **Selesai bila:** dipakai oleh minimal satu use case test.
 
@@ -389,9 +389,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** pemetaan domain → DTO.
 
-- [ ] Mapper `Monitor → MonitorDto` (tanpa rahasia, hanya `headerKeys`/`authType`).
-- [ ] `HealthStatus UP → [OPERATIONAL]`; status turunan `RECOVERING` (DOWN + `consecutiveSuccesses == 1`).
-- [ ] Mapper insiden & check; uptime `null` → "N/A" di DTO (nilai `null`, bukan 0).
+- [x] Mapper `Monitor → MonitorDto` (tanpa rahasia, hanya `headerKeys`/`authType`).
+- [x] `HealthStatus UP → [OPERATIONAL]`; status turunan `RECOVERING` (DOWN + `consecutiveSuccesses == 1`).
+- [x] Mapper insiden & check; uptime `null` → "N/A" di DTO (nilai `null`, bukan 0).
 
 **Selesai bila:** unit test memastikan tidak ada field rahasia pada DTO.
 **Ref:** ARCH §3.2, DES §3.2/§5.6.
@@ -402,9 +402,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P4.1 — Koneksi & konfigurasi Drizzle
 
-- [ ] `drizzle.config.ts` (drizzle-kit 0.31.x), fabrik `pg.Pool` (ukuran pool, timeout, `application_name`).
-- [ ] Rancang pembagian koneksi: Pool Drizzle, pool pg-boss, `pg.Client` khusus LISTEN.
-- [ ] Skrip `db:generate`, `db:migrate` (runner terisolasi).
+- [x] `drizzle.config.ts` (drizzle-kit 0.31.x), fabrik `pg.Pool` (ukuran pool, timeout, `application_name`).
+- [x] Rancang pembagian koneksi: Pool Drizzle, pool pg-boss, `pg.Client` khusus LISTEN.
+- [x] Skrip `db:generate`, `db:migrate` (runner terisolasi).
 
 **Selesai bila:** koneksi ke Postgres dev berhasil; pool ditutup rapi saat shutdown.
 **Ref:** ARCH §1.2, §6.
@@ -413,12 +413,12 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** skema ARCH §6.1 + penyesuaian D-nn.
 
-- [ ] Enum: `http_method`, `health_status`, `failure_category` (+ `REDIRECT_NOT_ALLOWED`), `delivery_status`, `trigger_type`.
-- [ ] Tabel: `users`, `sessions`, `rate_limits`, `monitors`, `incidents`, `check_results`, `monitor_metrics_hourly`, `notification_configs`, `notification_deliveries`, `worker_heartbeats`.
-- [ ] Tambahan: `check_results.{trigger_type, scheduled_for, started_at, finished_at, correlation_id, pinned_ip, diagnostics JSONB}`.
-- [ ] Constraint: `chk_monitor_interval`, `chk_monitor_timeout`; FK dan aksi `ON DELETE`.
-- [ ] Indeks: `idx_sessions_*`, `idx_rate_limits_expire`, `idx_monitors_due` (partial `is_active`), `uq_incidents_one_open` (partial), `idx_check_results_metrics` (INCLUDE), `idx_check_results_incident`, `idx_notification_deliveries_*`, `uq_single_owner_guard`.
-- [ ] Siklus FK `monitors.current_incident_id ↔ incidents` ditangani lewat `ALTER TABLE`.
+- [x] Enum: `http_method`, `health_status`, `failure_category` (+ `REDIRECT_NOT_ALLOWED`), `delivery_status`, `trigger_type`.
+- [x] Tabel: `users`, `sessions`, `rate_limits`, `monitors`, `incidents`, `check_results`, `monitor_metrics_hourly`, `notification_configs`, `notification_deliveries`, `worker_heartbeats`.
+- [x] Tambahan: `check_results.{trigger_type, scheduled_for, started_at, finished_at, correlation_id, pinned_ip, diagnostics JSONB}`.
+- [x] Constraint: `chk_monitor_interval`, `chk_monitor_timeout`; FK dan aksi `ON DELETE`.
+- [x] Indeks: `idx_sessions_*`, `idx_rate_limits_expire`, `idx_monitors_due` (partial `is_active`), `uq_incidents_one_open` (partial), `idx_check_results_metrics` (INCLUDE), `idx_check_results_incident`, `idx_notification_deliveries_*`, `uq_single_owner_guard`.
+- [x] Siklus FK `monitors.current_incident_id ↔ incidents` ditangani lewat `ALTER TABLE`.
 
 **Selesai bila:** skema Drizzle cocok dengan DDL referensi; tipe TS ter-generate.
 **Ref:** ARCH §6.1, §6.4.
@@ -427,21 +427,21 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** migrasi deklaratif + SQL manual untuk fitur yang tidak ditangani drizzle-kit.
 
-- [ ] Migrasi awal via `drizzle-kit generate`.
-- [ ] Migrasi kustom (`generate --custom`) untuk `check_results ... PARTITION BY RANGE (executed_at)`, partisi bulan berjalan + 2 bulan ke depan + partisi `DEFAULT` (D-06).
-- [ ] Pastikan snapshot drizzle tidak mencoba membuat ulang tabel partisi (gunakan pola modul terpisah/`tablesFilter` sesuai perilaku drizzle-kit versi terpasang).
-- [ ] Ekstensi: `pgcrypto` bila dibutuhkan pg-boss; `uuid-ossp` hanya bila benar-benar dipakai.
-- [ ] Migrasi seed minimal (tanpa data pengguna).
-- [ ] Runner `db:migrate` idempotent untuk container init.
+- [x] Migrasi awal via `drizzle-kit generate`.
+- [x] Migrasi kustom (`generate --custom`) untuk `check_results ... PARTITION BY RANGE (executed_at)`, partisi bulan berjalan + 2 bulan ke depan + partisi `DEFAULT` (D-06).
+- [x] Pastikan snapshot drizzle tidak mencoba membuat ulang tabel partisi (gunakan pola modul terpisah/`tablesFilter` sesuai perilaku drizzle-kit versi terpasang).
+- [x] Ekstensi: `pgcrypto` bila dibutuhkan pg-boss; `uuid-ossp` hanya bila benar-benar dipakai.
+- [x] Migrasi seed minimal (tanpa data pengguna).
+- [x] Runner `db:migrate` idempotent untuk container init.
 
 **Selesai bila:** migrasi bersih pada DB kosong dan idempotent saat diulang; insert ke tanggal acak masuk partisi benar.
 **Ref:** ARCH §6.1, §11.2; D-06.
 
 ### P4.4 — Pemeliharaan partisi & retensi
 
-- [ ] Fungsi `ensure_check_results_partitions(months_ahead)` (idempotent).
-- [ ] Fungsi/procedure drop partisi lebih tua dari `CHECK_RETENTION_DAYS` (D-23) dan pembersihan rollup lama.
-- [ ] Dipanggil oleh job maintenance (F9.5).
+- [x] Fungsi `ensure_check_results_partitions(months_ahead)` (idempotent).
+- [x] Fungsi/procedure drop partisi lebih tua dari `CHECK_RETENTION_DAYS` (D-23) dan pembersihan rollup lama.
+- [x] Dipanggil oleh job maintenance (F9.5).
 
 **Selesai bila:** uji integrasi: partisi baru terbentuk; partisi usang ter-drop; data aktif aman.
 
@@ -449,13 +449,13 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** implementasi port berbasis Drizzle.
 
-- [ ] `UserRepository`, `SessionRepository` (cari via hash token, hapus kedaluwarsa).
-- [ ] `MonitorRepository`: CRUD, update OCC `WHERE id AND version` (0 baris → `ConflictException`), `lockForUpdate(id)`, `claimDue(limit, tx)` (`FOR UPDATE SKIP LOCKED`), filter status/search + cursor.
-- [ ] `IncidentRepository`: simpan/resolve, ambil insiden terbuka, filter, detail.
-- [ ] `CheckResultRepository`: insert ke tabel partisi, daftar cursor (UUIDv7/waktu), stream cursor DB untuk CSV, sparkline 20 titik terakhir, recent feed.
-- [ ] `NotificationConfigRepository`, `NotificationDeliveryRepository` (PENDING→SENT/FAILED, retry_count).
-- [ ] `HeartbeatRepository` untuk `worker_heartbeats`.
-- [ ] Mapper baris ↔ entity domain.
+- [x] `UserRepository`, `SessionRepository` (cari via hash token, hapus kedaluwarsa).
+- [x] `MonitorRepository`: CRUD, update OCC `WHERE id AND version` (0 baris → `ConflictException`), `lockForUpdate(id)`, `claimDue(limit, tx)` (`FOR UPDATE SKIP LOCKED`), filter status/search + cursor.
+- [x] `IncidentRepository`: simpan/resolve, ambil insiden terbuka, filter, detail.
+- [x] `CheckResultRepository`: insert ke tabel partisi, daftar cursor (UUIDv7/waktu), stream cursor DB untuk CSV, sparkline 20 titik terakhir, recent feed.
+- [x] `NotificationConfigRepository`, `NotificationDeliveryRepository` (PENDING→SENT/FAILED, retry_count).
+- [x] `HeartbeatRepository` untuk `worker_heartbeats`.
+- [x] Mapper baris ↔ entity domain.
 
 **Selesai bila:** tiap repository diuji integrasi.
 **Ref:** ARCH §4.2, §6.3.
@@ -464,33 +464,33 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** transaksi tunggal untuk hasil probe + state + insiden + enqueue (tanpa dual-write).
 
-- [ ] Transaksi `READ COMMITTED`; repository & `QueuePort` terikat ke `tx` yang sama.
-- [ ] `QueuePort.send(..., tx)` memakai `fromDrizzle(tx, sql)` (D-01); cek return `null` (D-02).
-- [ ] `NOTIFY` dikeluarkan di dalam transaksi (terkirim saat commit).
-- [ ] Rollback penuh bila ada error (tidak ada ghost incident/orphan result).
+- [x] Transaksi `READ COMMITTED`; repository & `QueuePort` terikat ke `tx` yang sama.
+- [x] `QueuePort.send(..., tx)` memakai `fromDrizzle(tx, sql)` (D-01); cek return `null` (D-02).
+- [x] `NOTIFY` dikeluarkan di dalam transaksi (terkirim saat commit).
+- [x] Rollback penuh bila ada error (tidak ada ghost incident/orphan result).
 
 **Selesai bila:** uji integrasi: kegagalan di tengah → tidak ada baris check/insiden/job; sukses → semua ada atomik.
 **Ref:** ARCH §1.1.2, §6.3.A.
 
 ### P4.7 — Query metrik SQL & rollup
 
-- [ ] Query bucket 24 jam (`date_bin` 5 menit, `percentile_cont` p95/p99) sesuai ARCH §6.2; filter hanya `SCHEDULED`.
-- [ ] Query 7 hari/30 hari dari `monitor_metrics_hourly` (sub-100 ms).
-- [ ] Upsert rollup per jam (idempotent, aman diulang).
-- [ ] Kebijakan latency: definisikan apakah latency kegagalan terukur ikut dihitung (PRD §4.12 mengizinkan, harus dibedakan); dokumentasikan.
-- [ ] `total_checks = 0` → N/A (bukan 100%).
+- [x] Query bucket 24 jam (`date_bin` 5 menit, `percentile_cont` p95/p99) sesuai ARCH §6.2; filter hanya `SCHEDULED`.
+- [x] Query 7 hari/30 hari dari `monitor_metrics_hourly` (sub-100 ms).
+- [x] Upsert rollup per jam (idempotent, aman diulang).
+- [x] Kebijakan latency: definisikan apakah latency kegagalan terukur ikut dihitung (PRD §4.12 mengizinkan, harus dibedakan); dokumentasikan.
+- [x] `total_checks = 0` → N/A (bukan 100%).
 
 **Selesai bila:** hasil agregasi cocok dengan perhitungan referensi di tes.
 **Ref:** ARCH §6.2, §6.4.B, PRD §4.11/§4.12.
 
 ### P4.8 — Uji integrasi database (Testcontainers)
 
-- [ ] Rollback atomik UoW.
-- [ ] Dua koneksi bersamaan pada `claimDue` tidak mengambil baris yang sama.
-- [ ] `uq_incidents_one_open` menolak insiden terbuka kedua.
-- [ ] `uq_single_owner_guard` menolak user kedua.
-- [ ] OCC mendeteksi update konkuren → 409.
-- [ ] Routing partisi, pagination cursor stabil.
+- [x] Rollback atomik UoW.
+- [x] Dua koneksi bersamaan pada `claimDue` tidak mengambil baris yang sama.
+- [x] `uq_incidents_one_open` menolak insiden terbuka kedua.
+- [x] `uq_single_owner_guard` menolak user kedua.
+- [x] OCC mendeteksi update konkuren → 409.
+- [x] Routing partisi, pagination cursor stabil.
 
 **Selesai bila:** semua lulus di CI; cakupan infra ≥ 80%.
 **Ref:** ARCH §13, PRD §5.2.
@@ -501,53 +501,53 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P5.1 — UUIDv7 generator & SystemClock
 
-- [ ] `UuidV7GeneratorAdapter` (monoton, urut waktu); `SystemClockAdapter` (dapat diganti saat tes).
+- [x] `UuidV7GeneratorAdapter` (monoton, urut waktu); `SystemClockAdapter` (dapat diganti saat tes).
 
 ### P5.2 — LibsodiumAeadCipherAdapter
 
 **Membangun:** enkripsi rahasia XChaCha20-Poly1305-IETF dengan AAD.
 
-- [ ] Parse `APP_KEYRING` (`activeKeyId`, `keys`); inisialisasi `libsodium-wrappers-sumo` (`await sodium.ready`).
-- [ ] `encrypt(plaintext, {monitorId|configId, fieldName})` → `v1:<keyId>:<hexNonce>:<hexCt>` dengan nonce acak 24 byte; AAD `monitorId:<id>:field:<name>` (token Telegram: D-21).
-- [ ] `decrypt` membaca `keyId` dari prefix; error jelas untuk kunci tidak ada / MAC salah / AAD tidak cocok.
-- [ ] Skrip `secrets:reencrypt` (k_lama → k_aktif) untuk prosedur rotasi (ARCH §11.4 langkah 4), idempotent dan dapat dilanjutkan.
-- [ ] Bersihkan buffer kunci dari log; tidak pernah mencetak plaintext.
+- [x] Parse `APP_KEYRING` (`activeKeyId`, `keys`); inisialisasi `libsodium-wrappers-sumo` (`await sodium.ready`).
+- [x] `encrypt(plaintext, {monitorId|configId, fieldName})` → `v1:<keyId>:<hexNonce>:<hexCt>` dengan nonce acak 24 byte; AAD `monitorId:<id>:field:<name>` (token Telegram: D-21).
+- [x] `decrypt` membaca `keyId` dari prefix; error jelas untuk kunci tidak ada / MAC salah / AAD tidak cocok.
+- [x] Skrip `secrets:reencrypt` (k_lama → k_aktif) untuk prosedur rotasi (ARCH §11.4 langkah 4), idempotent dan dapat dilanjutkan.
+- [x] Bersihkan buffer kunci dari log; tidak pernah mencetak plaintext.
 
 **Selesai bila:** uji: roundtrip, tukar ciphertext antar monitor/kolom → gagal, rotasi kunci, format salah.
 **Ref:** ARCH §5.2, §11.4, ADR 003.
 
 ### P5.3 — NodeArgon2HasherAdapter
 
-- [ ] Hash/verify Argon2id (`@node-rs/argon2`) dengan parameter terdokumentasi.
-- [ ] `verifyDummy()` terhadap hash konstan agar waktu login username tak dikenal setara (anti user enumeration).
+- [x] Hash/verify Argon2id (`@node-rs/argon2`) dengan parameter terdokumentasi.
+- [x] `verifyDummy()` terhadap hash konstan agar waktu login username tak dikenal setara (anti user enumeration).
 
 **Selesai bila:** uji timing kasar: selisih jalur sukses/gagal tidak signifikan.
 **Ref:** ARCH §5.3.
 
 ### P5.4 — PinoLoggerAdapter + redaksi
 
-- [ ] Logger JSON (pino v10) dengan field `monitorId`, `checkId`, `incidentId`, `correlationId`.
-- [ ] Redaksi regex `/bot\d+:[A-Za-z0-9_-]+/`, header `Authorization`, `Proxy-Authorization`, `X-Api-Key`, field kredensial pada payload; serializer `err` aman.
-- [ ] Level dari `LOG_LEVEL`.
+- [x] Logger JSON (pino v10) dengan field `monitorId`, `checkId`, `incidentId`, `correlationId`.
+- [x] Redaksi regex `/bot\d+:[A-Za-z0-9_-]+/`, header `Authorization`, `Proxy-Authorization`, `X-Api-Key`, field kredensial pada payload; serializer `err` aman.
+- [x] Level dari `LOG_LEVEL`.
 
 **Selesai bila:** unit test: token Telegram & auth header tidak pernah muncul dalam output.
 **Ref:** ARCH §1.1.3, §13; PRD §4.20.
 
 ### P5.5 — PostgresRateLimiterAdapter
 
-- [ ] Sliding-window pada tabel `rate_limits` (upsert atomik, `expire_at`).
-- [ ] Tier 1: 5 login gagal / 15 menit per IP (`ip:login`) dan per username (`user:login`).
-- [ ] Tier 2: 1 check / 10 dtk per monitor ID dan 20 check / menit per user.
-- [ ] Tier 3: 120 request / menit per user.
-- [ ] Hitung `retryAfterSeconds` → `RateLimitExceededException`.
+- [x] Sliding-window pada tabel `rate_limits` (upsert atomik, `expire_at`).
+- [x] Tier 1: 5 login gagal / 15 menit per IP (`ip:login`) dan per username (`user:login`).
+- [x] Tier 2: 1 check / 10 dtk per monitor ID dan 20 check / menit per user.
+- [x] Tier 3: 120 request / menit per user.
+- [x] Hitung `retryAfterSeconds` → `RateLimitExceededException`.
 
 **Selesai bila:** uji konkurensi: tidak ada lolos melebihi batas; kedaluwarsa benar.
 **Ref:** ARCH §5.3.5.
 
 ### P5.6 — PgListenNotifyAdapter (PubSubPort)
 
-- [ ] Publisher `NOTIFY sentinel_events, payload` (validasi < 8.000 byte).
-- [ ] Subscriber `pg.Client` khusus `LISTEN sentinel_events` dengan reconnect eksponensial dan hook `onReconnect`.
+- [x] Publisher `NOTIFY sentinel_events, payload` (validasi < 8.000 byte).
+- [x] Subscriber `pg.Client` khusus `LISTEN sentinel_events` dengan reconnect eksponensial dan hook `onReconnect`.
 
 **Selesai bila:** uji integrasi: event diterima; setelah koneksi diputus, subscriber pulih dan memicu callback resync.
 **Ref:** ARCH §7.2.
