@@ -17,6 +17,7 @@
   "dependencies": {
     "@sentinel/application": "workspace:*",
     "@sentinel/contracts": "workspace:*",
-    "@sentinel/domain": "workspace:*"
+    "@sentinel/domain": "workspace:*",
+    "zod": "4.6.7"
   }
 }
