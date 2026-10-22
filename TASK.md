@@ -137,12 +137,12 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** struktur folder lengkap ARCH §2 (kosong tetapi valid).
 
-- [ ] `packages/contracts/src/{dtos,schemas,events}`.
-- [ ] `packages/domain/src/{entities,value-objects,events,services,errors}`.
-- [ ] `packages/application/src/{ports/in,ports/out,use-cases}`.
-- [ ] `packages/infra/src/{db,repositories,network,crypto,notification,queue,logging,config}`.
-- [ ] `apps/web` (Nuxt 4 `app/` + `server/{api,routes,plugins,middleware,utils}`), `apps/worker/src/{index.ts,scheduler.ts,jobs,container.ts}`.
-- [ ] Tiap paket punya `index.ts` sebagai public API.
+- [x] `packages/contracts/src/{dtos,schemas,events}`.
+- [x] `packages/domain/src/{entities,value-objects,events,services,errors}`.
+- [x] `packages/application/src/{ports/in,ports/out,use-cases}`.
+- [x] `packages/infra/src/{db,repositories,network,crypto,notification,queue,logging,config}`.
+- [x] `apps/web` (Nuxt 4 `app/` + `server/{api,routes,plugins,middleware,utils}`), `apps/worker/src/{index.ts,scheduler.ts,jobs,container.ts}`.
+- [x] Tiap paket punya `index.ts` sebagai public API.
 
 **Selesai bila:** semua paket dapat di-build/typecheck.
 **Ref:** ARCH §2.
@@ -151,8 +151,8 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** lint + format tunggal.
 
-- [ ] Tambah `biome.json` persis ARCH §2.1.A (versi sesuai D-24).
-- [ ] Skrip `lint`, `format`, `check`; format ulang repo awal.
+- [x] Tambah `biome.json` persis ARCH §2.1.A (versi sesuai D-24).
+- [x] Skrip `lint`, `format`, `check`; format ulang repo awal.
 
 **Selesai bila:** `bun run lint` bersih.
 **Ref:** ARCH §2.1.A.
@@ -161,10 +161,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** gerbang CI yang menggagalkan pelanggaran batas layer.
 
-- [ ] `.dependency-cruiser.js` dengan aturan tabel ARCH §2.1.B (domain tanpa impor apa pun kecuali TS standar; application → domain+contracts; contracts → tidak ada paket internal; infra → application/domain/contracts; web/worker; worker dilarang impor web).
-- [ ] Larang `domain` mengimpor pustaka I/O/framework eksternal.
-- [ ] Skrip `check:boundaries` (exit code 1 jika melanggar).
-- [ ] Tambah uji negatif: berkas fixture yang sengaja melanggar harus membuat check gagal.
+- [x] `.dependency-cruiser.js` dengan aturan tabel ARCH §2.1.B (domain tanpa impor apa pun kecuali TS standar; application → domain+contracts; contracts → tidak ada paket internal; infra → application/domain/contracts; web/worker; worker dilarang impor web).
+- [x] Larang `domain` mengimpor pustaka I/O/framework eksternal.
+- [x] Skrip `check:boundaries` (exit code 1 jika melanggar).
+- [x] Tambah uji negatif: berkas fixture yang sengaja melanggar harus membuat check gagal.
 
 **Selesai bila:** pelanggaran fixture terdeteksi; kode asli lolos.
 **Ref:** ARCH §1.1, §2.1.B.
@@ -173,10 +173,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** infrastruktur pengujian.
 
-- [ ] Vitest workspace per paket; ambang cakupan: domain & application ≥ 90%, infra ≥ 80%, SSRF guard 100%.
-- [ ] Helper `@testcontainers/postgresql` (PostgreSQL 17) dengan migrasi otomatis dan truncate antar-tes.
-- [ ] Helper server HTTP lokal terkendali (respons status/lambat/besar/gzip/redirect) dan mock DNS (untuk F6).
-- [ ] Helper mock Telegram API (kontrol 200/429/500).
+- [x] Vitest workspace per paket; ambang cakupan: domain & application ≥ 90%, infra ≥ 80%, SSRF guard 100%.
+- [x] Helper `@testcontainers/postgresql` (PostgreSQL 17) dengan migrasi otomatis dan truncate antar-tes.
+- [x] Helper server HTTP lokal terkendali (respons status/lambat/besar/gzip/redirect) dan mock DNS (untuk F6).
+- [x] Helper mock Telegram API (kontrol 200/429/500).
 
 **Selesai bila:** satu tes contoh di tiap layer berjalan.
 **Ref:** ARCH §13, PRD §5.
@@ -185,10 +185,10 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** modul konfigurasi tunggal yang dipakai web & worker.
 
-- [ ] `packages/infra/src/config/env.ts` dengan `EnvSchema` Zod (ARCH §10) + variabel D-20 (`WORKER_PORT`, `HEARTBEAT_INTERVAL_SECONDS`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `CHECK_RETENTION_DAYS`, `TELEGRAM_API_BASE_URL`).
-- [ ] Validasi `APP_KEYRING` (JSON, `activeKeyId` ada, semua key 32 byte base64).
-- [ ] Proses gagal booting dengan pesan jelas tanpa mencetak nilai rahasia.
-- [ ] Buat `.env.example` lengkap (ARCH §10).
+- [x] `packages/infra/src/config/env.ts` dengan `EnvSchema` Zod (ARCH §10) + variabel D-20 (`WORKER_PORT`, `HEARTBEAT_INTERVAL_SECONDS`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `CHECK_RETENTION_DAYS`, `TELEGRAM_API_BASE_URL`).
+- [x] Validasi `APP_KEYRING` (JSON, `activeKeyId` ada, semua key 32 byte base64).
+- [x] Proses gagal booting dengan pesan jelas tanpa mencetak nilai rahasia.
+- [x] Buat `.env.example` lengkap (ARCH §10).
 
 **Selesai bila:** env invalid menghentikan boot; unit test menutup tiap aturan.
 **Ref:** ARCH §10.
@@ -197,9 +197,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** lingkungan lokal PostgreSQL 17 + Prometheus + Jaeger.
 
-- [ ] `docker-compose.dev.yml` (ARCH §11.3) dan `infra/prometheus/prometheus.yml` (scrape web:3000 & worker:3001).
-- [ ] Hapus kunci `version` yang usang bila perlu.
-- [ ] Dokumentasikan workflow dev 5 langkah (ARCH §11.3).
+- [x] `docker-compose.dev.yml` (ARCH §11.3) dan `infra/prometheus/prometheus.yml` (scrape web:3000 & worker:3001).
+- [x] Hapus kunci `version` yang usang bila perlu.
+- [x] Dokumentasikan workflow dev 5 langkah (ARCH §11.3).
 
 **Selesai bila:** `docker compose -f docker-compose.dev.yml up -d` sehat; `pg_isready` OK.
 **Ref:** ARCH §11.3.
@@ -208,8 +208,8 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** gerbang kualitas otomatis.
 
-- [ ] Job: install (`--frozen-lockfile`), lint, typecheck, check:boundaries, unit, integration (Testcontainers), build web & worker, E2E (Playwright), audit dependensi.
-- [ ] Cache Bun, laporan cakupan, gagal bila di bawah ambang.
+- [x] Job: install (`--frozen-lockfile`), lint, typecheck, check:boundaries, unit, integration (Testcontainers), build web & worker, E2E (Playwright), audit dependensi.
+- [x] Cache Bun, laporan cakupan, gagal bila di bawah ambang.
 
 **Selesai bila:** pipeline hijau pada repo awal.
 **Ref:** ARCH §2.1, §13.
