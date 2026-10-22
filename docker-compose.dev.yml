@@ -1,0 +1,54 @@
+# ==============================================================================
+# API Sentinel - Local Development Environment (ARCH §11.3)
+#
+# 5-Step Developer Workflow:
+# 1. Start local infra: docker compose -f docker-compose.dev.yml up -d
+# 2. Run schema migration: bun run db:migrate
+# 3. Start web dashboard: bun run dev:web (Nuxt 4 on http://localhost:3000)
+# 4. Start probe daemon: bun run dev:worker (Worker on http://localhost:3001)
+# 5. Observability: Jaeger UI on http://localhost:16686, Prometheus on http://localhost:9090
+# ==============================================================================
+
+services:
+  postgres-dev:
+    image: postgres:17-alpine
+    container_name: sentinel-postgres-dev
+    ports:
+      - "${DEV_POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: sentinel_user
+      POSTGRES_PASSWORD: sentinel_password
+      POSTGRES_DB: api_sentinel_dev
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel_user -d api_sentinel_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prometheus-dev:
+    image: prom/prometheus:v3.15.1
+    container_name: sentinel-prometheus-dev
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  jaeger-dev:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: sentinel-jaeger-dev
+    ports:
+      - "16686:16686" # Web UI
+      - "4318:4318"   # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+volumes:
+  pgdata_dev:
