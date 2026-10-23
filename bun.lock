@@ -1,0 +1,76 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "api-sentinel-monorepo",
+      "devDependencies": {
+        "@types/node": "^24.11.1",
+        "typescript": "~5.9.3",
+      },
+    },
+    "apps/web": {
+      "name": "@sentinel/web",
+      "version": "0.1.0",
+      "dependencies": {
+        "@sentinel/application": "workspace:*",
+        "@sentinel/contracts": "workspace:*",
+        "@sentinel/infra": "workspace:*",
+      },
+    },
+    "apps/worker": {
+      "name": "@sentinel/worker",
+      "version": "0.1.0",
+      "dependencies": {
+        "@sentinel/application": "workspace:*",
+        "@sentinel/contracts": "workspace:*",
+        "@sentinel/domain": "workspace:*",
+        "@sentinel/infra": "workspace:*",
+      },
+    },
+    "packages/application": {
+      "name": "@sentinel/application",
+      "version": "0.1.0",
+      "dependencies": {
+        "@sentinel/contracts": "workspace:*",
+        "@sentinel/domain": "workspace:*",
+      },
+    },
+    "packages/contracts": {
+      "name": "@sentinel/contracts",
+      "version": "0.1.0",
+    },
+    "packages/domain": {
+      "name": "@sentinel/domain",
+      "version": "0.1.0",
+    },
+    "packages/infra": {
+      "name": "@sentinel/infra",
+      "version": "0.1.0",
+      "dependencies": {
+        "@sentinel/application": "workspace:*",
+        "@sentinel/contracts": "workspace:*",
+        "@sentinel/domain": "workspace:*",
+      },
+    },
+  },
+  "packages": {
+    "@sentinel/application": ["@sentinel/application@workspace:packages/application"],
+
+    "@sentinel/contracts": ["@sentinel/contracts@workspace:packages/contracts"],
+
+    "@sentinel/domain": ["@sentinel/domain@workspace:packages/domain"],
+
+    "@sentinel/infra": ["@sentinel/infra@workspace:packages/infra"],
+
+    "@sentinel/web": ["@sentinel/web@workspace:apps/web"],
+
+    "@sentinel/worker": ["@sentinel/worker@workspace:apps/worker"],
+
+    "@types/node": ["@types/node@24.19.2", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ=="],
+
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "undici-types": ["undici-types@7.24.6", "", {}, "sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg=="],
+  }
+}
