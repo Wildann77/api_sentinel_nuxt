@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "backend-development": {
+      "source": "mrgoonie/claudekit-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/backend-development/SKILL.md",
+      "computedHash": "19a6a72ddb96062c3edef801451bd721726dd571f7db221f0b4d83ad70aad114"
+    },
+    "clean-code-principles": {
+      "source": "asyrafhussin/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/clean-code-principles/SKILL.md",
+      "computedHash": "4c22dca6110d58f1454523dc3f192ef20d91f538233da9132b407edd041a4762"
+    },
+    "clean-ddd-hexagonal": {
+      "source": "ccheney/robust-skills",
+      "sourceType": "github",
+      "skillPath": "skills/clean-ddd-hexagonal/SKILL.md",
+      "computedHash": "7f14c93b5aedb7fa2b63998aa572c1dea97e495dc3c77dae251ff33e408ceb7f"
+    },
+    "frontend-design": {
+      "source": "PracticalSwan/agent-skills",
+      "sourceType": "github",
+      "skillPath": "frontend-design/SKILL.md",
+      "computedHash": "a07c2f5a5625c7061ae5ce0687e80aceb577a359c70e57c80f9d4eafce499623"
+    },
+    "frontend-engineering": {
+      "source": "magnus919/agent-skills",
+      "sourceType": "github",
+      "skillPath": "frontend-engineering/SKILL.md",
+      "computedHash": "4619c8e921d695ae5affa786f3764233f4787070c12ca6d0e18dd5262821297b"
+    },
+    "nuxt": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nuxt/SKILL.md",
+      "computedHash": "03fc229d7c6a300b2ded6d9f984b45d8a554c2c991199c54760893e627c91371"
+    },
+    "nuxt-ui": {
+      "source": "onmax/nuxt-skills",
+      "sourceType": "github",
+      "skillPath": "skills/nuxt-ui/SKILL.md",
+      "computedHash": "54f1702fbcbb49e7bae05cb333d02ccf16bcfb6b54984116021e3aeead24b652"
+    }
+  }
+}
