@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@sentinel/contracts": ["./packages/contracts/src/index.ts"],
+      "@sentinel/contracts/*": ["./packages/contracts/src/*"],
+      "@sentinel/domain": ["./packages/domain/src/index.ts"],
+      "@sentinel/domain/*": ["./packages/domain/src/*"],
+      "@sentinel/application": ["./packages/application/src/index.ts"],
+      "@sentinel/application/*": ["./packages/application/src/*"],
+      "@sentinel/infra": ["./packages/infra/src/index.ts"],
+      "@sentinel/infra/*": ["./packages/infra/src/*"],
+      "@sentinel/web": ["./apps/web/src/index.ts"],
+      "@sentinel/web/*": ["./apps/web/src/*"],
+      "@sentinel/worker": ["./apps/worker/src/index.ts"],
+      "@sentinel/worker/*": ["./apps/worker/src/*"]
+    }
+  }
+}
