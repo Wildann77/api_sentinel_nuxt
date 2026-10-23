@@ -67,7 +67,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 | D-02 | pg-boss v10+ mewajibkan `createQueue()` sebelum `send()`; `singletonKey` hanya menjamin keunikan pada policy `short`/`singleton`/`stately`; `send()` mengembalikan `null` (bukan error) bila ditolak policy. ARCH tidak menyebut policy. | **DISETUJUI:** `probe:check` → policy `stately` + `singletonKey = monitorId` (maks 1 queued + 1 active per monitor; selaras PRD §4.9). `notification:send` → `stately` + `singletonKey = incidentId:type`. Selalu cek return `null`. Handler `work()` menerima array job. | Ya (F9) |
 | D-03 | ARCH §1.2: `drizzle-kit v0.30.5` dipasangkan dengan `drizzle-orm v0.45.4`. Pasangan yang lazim adalah drizzle-orm 0.45.x + drizzle-kit 0.31.x; drizzle-orm < 0.45.2 terkena CVE-2026-39356. | **DISETUJUI:** Pin `drizzle-orm 0.45.4` dan `drizzle-kit 0.31.11`. Update matriks ARCH §1.2. | Ya (F1) |
 | D-04 | ARCH §11.1 menyalin `bun.lockb`. Sejak Bun 1.2 default lockfile adalah `bun.lock` (teks); `--frozen-lockfile` akan gagal. | **DISETUJUI:** Ganti ke `bun.lock` di Dockerfile dan workflow CI. | Tidak |
-| D-05 | ARCH §1.2 menyebut `- [x] Beri nama pakettanstack/vue-charts v1.1.0` untuk `<UChart>`; dokumentasi Nuxt UI menyebut `<UChart>` dibangun di atas TanStack Charts dan `@tanstack/charts` adalah optional peer dependency. | **DISETUJUI:** Pasang paket peer sesuai dokumentasi Nuxt UI v4.12 saat F14; perbarui ARCH. | Tidak |
+| D-05 | ARCH §1.2 menyebut `@tanstack/vue-charts v1.1.0` untuk `<UChart>`; dokumentasi Nuxt UI menyebut `<UChart>` dibangun di atas TanStack Charts dan `@tanstack/charts` adalah optional peer dependency. | **DISETUJUI:** Pasang paket peer sesuai dokumentasi Nuxt UI v4.12 saat F14; perbarui ARCH. | Tidak |
 | D-06 | `check_results` dipartisi bulanan, tetapi hanya 2 partisi contoh; tidak ada pembuatan partisi otomatis, partisi default, maupun retensi. drizzle-kit kurang andal untuk tabel partisi. | **DISETUJUI:** Migrasi kustom SQL untuk tabel partisi + job pemeliharaan (buat partisi N bulan ke depan, drop partisi lewat retensi) + partisi `DEFAULT` sebagai jaring pengaman. | Ya (F4) |
 | D-07 | Job latar yang disebut tetapi belum didefinisikan: rollup `monitor_metrics_hourly`, cleanup `rate_limits` (ARCH §5.3 menyebut hourly), cleanup `sessions` kedaluwarsa, pemeliharaan partisi, retensi. | **DISETUJUI:** Daftarkan sebagai cron pg-boss di `apps/worker/src/jobs/maintenance` (F9). | Tidak |
 | D-08 | PRD §4.3: akun awal dibuat lewat "proses setup yang dibatasi dan didokumentasikan"; ARCH tidak punya mekanisme. | **DISETUJUI:** CLI `bun run owner:create` (interaktif/env), menolak jika sudah ada user (didukung `uq_single_owner_guard`). | Tidak |
@@ -84,9 +84,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 | D-19 | Endpoint pendukung UI yang belum ada: feed pemeriksaan terbaru (DES §5.2), sparkline 20 titik per monitor (DES §5.3), grafik latency komposit multi-monitor (DES §5.2), status notifikasi pada insiden (DES §5.6). | **DISETUJUI:** Tambah `GET /api/checks/recent`, field `sparkline` pada list monitor, `GET /api/metrics/latency?range=`, dan ringkasan `notificationDeliveries` pada DTO insiden. | Tidak |
 | D-20 | Env schema ARCH §10 tidak memuat `WORKER_PORT`, `HEARTBEAT_INTERVAL_SECONDS`, `OTEL_*`, `CHECK_RETENTION_DAYS`, `TELEGRAM_API_BASE_URL`; peran `SESSION_SECRET` tidak jelas karena sesi memakai opaque token + SHA-256. | **DISETUJUI (FINAL):** `SESSION_SECRET` wajib di `.env`: dipakai untuk cookie signing + HMAC-SHA256 token hash. Lengkapi semua env var yang kurang di Zod schema (`WORKER_PORT`, `HEARTBEAT_INTERVAL_SECONDS`, `OTEL_*`, `CHECK_RETENTION_DAYS`, `TELEGRAM_API_BASE_URL`). | Tidak |
 | D-21 | AAD enkripsi hanya didefinisikan untuk monitor (`monitorId:field:name`); token Telegram di `notification_configs` belum punya AAD. | **DISETUJUI:** AAD token: `notificationConfigId:field:botToken`. | Tidak |
-| D-22 | DES §6.2 memakai API v2 (`primary: 'emerald'`, `gray: 'zinc'`) dan utilitas `zinc-*`, sementara DES §10 melarang warna hardcode. Nuxt UI v4 memakai `ui.colors` (`primary`, `neutral`). | **DISETUJUI:** Verifikasi skema `app.config.ts` terhadap docs Nuxt UI v4; definisikan token semantik di Tailwind `- [x] Beri nama pakettheme` dan pakai itu. | Tidak |
+| D-22 | DES §6.2 memakai API v2 (`primary: 'emerald'`, `gray: 'zinc'`) dan utilitas `zinc-*`, sementara DES §10 melarang warna hardcode. Nuxt UI v4 memakai `ui.colors` (`primary`, `neutral`). | **DISETUJUI:** Verifikasi skema `app.config.ts` terhadap docs Nuxt UI v4; definisikan token semantik di Tailwind `@theme` dan pakai itu. | Tidak |
 | D-23 | Retensi data: PRD §4.4 menyerahkan kebijakan ke implementasi. | **DISETUJUI:** Default `CHECK_RETENTION_DAYS=90`, rollup per jam dipertahankan 400 hari; dapat dikonfigurasi. | Tidak |
-| D-24 | Ambiguitas versi `typescript v5.9+ / v7.0.x`; versi lain di matriks ARCH belum diverifikasi terhadap registry saat implementasi. | **DISETUJUI (FINAL):** Pin TypeScript `~5.9.3`. Versi definitif verified: `drizzle-orm 0.45.4`, `drizzle-kit 0.31.11`, `pg-boss 12.38.0`, `nuxt 4.6.2`, `- [x] Beri nama paketnuxt/ui 4.12.0`, `zod 4.6.7`, `libsodium-wrappers-sumo 0.8.4`, `@biomejs/biome 2.6.2`. | Tidak |
+| D-24 | Ambiguitas versi `typescript v5.9+ / v7.0.x`; versi lain di matriks ARCH belum diverifikasi terhadap registry saat implementasi. | **DISETUJUI (FINAL):** Pin TypeScript `~5.9.3`. Versi definitif verified: `drizzle-orm 0.45.4`, `drizzle-kit 0.31.11`, `pg-boss 12.38.0`, `nuxt 4.6.2`, `@nuxt/ui 4.12.0`, `zod 4.6.7`, `libsodium-wrappers-sumo 0.8.4`, `@biomejs/biome 2.6.2`. | Tidak |
 
 - [x] Tinjau semua D-nn, ubah rekomendasi bila perlu, tandai keputusan final.
 - [x] Catat versi final paket (D-03, D-24) pada tabel yang sama.
@@ -126,9 +126,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** basis TS ketat untuk semua paket.
 
-- [ ] `tsconfig.base.json`: `strict: true`, `verbatimModuleSyntax: true`, target `ES2023`, `moduleResolution: Bundler`, `noUncheckedIndexedAccess`.
-- [ ] Buat `tsconfig.json` per paket yang meng-extend base; atur path alias `- [x] Beri nama paketsentinel/*`.
-- [ ] Pastikan Nuxt `tsconfig` (generated) kompatibel dengan base.
+- [x] `tsconfig.base.json`: `strict: true`, `verbatimModuleSyntax: true`, target `ES2023`, `moduleResolution: Bundler`, `noUncheckedIndexedAccess`.
+- [x] Buat `tsconfig.json` per paket yang meng-extend base; atur path alias `@sentinel/*`.
+- [x] Pastikan Nuxt `tsconfig` (generated) kompatibel dengan base.
 
 **Selesai bila:** `bun run typecheck` lulus pada semua paket kosong.
 **Ref:** ARCH §1.2, §2.
@@ -174,7 +174,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 **Membangun:** infrastruktur pengujian.
 
 - [ ] Vitest workspace per paket; ambang cakupan: domain & application ≥ 90%, infra ≥ 80%, SSRF guard 100%.
-- [ ] Helper `- [x] Beri nama pakettestcontainers/postgresql` (PostgreSQL 17) dengan migrasi otomatis dan truncate antar-tes.
+- [ ] Helper `@testcontainers/postgresql` (PostgreSQL 17) dengan migrasi otomatis dan truncate antar-tes.
 - [ ] Helper server HTTP lokal terkendali (respons status/lambat/besar/gzip/redirect) dan mock DNS (untuk F6).
 - [ ] Helper mock Telegram API (kontrol 200/429/500).
 
@@ -248,7 +248,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 **Membangun:** validasi URL target di sisi domain.
 
-- [ ] Hanya skema `http`/`https`; tolak userinfo (`user:pass- [x] Beri nama paket`); tolak host kosong; dukung IPv6 berkurung.
+- [ ] Hanya skema `http`/`https`; tolak userinfo (`user:pass@`); tolak host kosong; dukung IPv6 berkurung.
 - [ ] Jika hostname adalah IP literal, jalankan `NetworkPolicy`.
 - [ ] Batas panjang URL; normalisasi (tanpa mengubah semantik).
 - [ ] Pesan error `ValidationException` dengan `invalidParams` (contoh ARCH §9.1.C).
@@ -291,7 +291,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 - [ ] Kasus gagal bernama: JSON tidak valid, JSONPath tidak dapat diproses, nilai tidak ada.
 - [ ] Sukses hanya bila semua aturan aktif lulus (PRD §4.7).
 
-**Selesai bila:** unit test: status/header/JSONPath, JSON invalid, tipe ketat, serangan injeksi (`$..[?(- [x] Beri nama paket.constructor...)]`) ditolak.
+**Selesai bila:** unit test: status/header/JSONPath, JSON invalid, tipe ketat, serangan injeksi (`$..[?(@.constructor...)]`) ditolak.
 **Ref:** ARCH §3.3, PRD §4.7/§5.1.
 
 ### P2.7 — CheckResult entity & sanitasi diagnostik
@@ -518,7 +518,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P5.3 — NodeArgon2HasherAdapter
 
-- [ ] Hash/verify Argon2id (`- [x] Beri nama paketnode-rs/argon2`) dengan parameter terdokumentasi.
+- [ ] Hash/verify Argon2id (`@node-rs/argon2`) dengan parameter terdokumentasi.
 - [ ] `verifyDummy()` terhadap hash konstan agar waktu login username tak dikenal setara (anti user enumeration).
 
 **Selesai bila:** uji timing kasar: selisih jalur sukses/gagal tidak signifikan.
@@ -843,7 +843,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 ### P11.3 — Ekspor CSV
 
 - [ ] `GET /api/reports/export.csv?type=checks|incidents&monitorId&from&to` (D-18), streaming cursor DB (tanpa memuat seluruh data).
-- [ ] `sanitizeCsvValue` persis ARCH §5.4 (prefix `'` untuk `= + - - [x] Beri nama paket \t \r`; kolom numerik tidak diberi prefix; kutip RFC 4180).
+- [ ] `sanitizeCsvValue` persis ARCH §5.4 (prefix `'` untuk `= + - @ \t \r`; kolom numerik tidak diberi prefix; kutip RFC 4180).
 - [ ] Kolom: waktu, nama monitor, hasil, status HTTP, latency, kategori kegagalan, mulai/pulih insiden; header `Content-Disposition`.
 - [ ] Tidak ada password/token/API key/header auth/kunci enkripsi.
 
@@ -888,7 +888,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P13.1 — OpenTelemetry
 
-- [ ] `- [x] Beri nama paketopentelemetry/sdk-node` di web & worker; ekspor OTLP HTTP ke Jaeger.
+- [ ] `@opentelemetry/sdk-node` di web & worker; ekspor OTLP HTTP ke Jaeger.
 - [ ] Propagasi W3C `traceparent` lewat payload job (`__traceparent`).
 - [ ] Span: `queue.wait_duration`, `probe.dns_lookup`, `probe.tcp_connect`, `probe.tls_handshake`, `probe.response_transfer`, `assertion.evaluation`, `db.transaction.save`, `notification.telegram_send`.
 
@@ -920,9 +920,9 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P14.1 — Konfigurasi Nuxt & Tailwind v4
 
-- [ ] `nuxt.config.ts` ARCH §8.1: `compatibilityVersion: 4`, modul `- [x] Beri nama paketnuxt/ui`, `routeRules` (`/login` SSR, `/dashboard/**` SPA, `/api/**` tanpa CORS), Nitro `node-server` + WebSocket, `build.transpile` paket `@sentinel/*`.
-- [ ] Pasang peer chart sesuai Nuxt UI v4.12 (D-05); fallback `- [x] Beri nama paketunovis/vue` hanya untuk korelasi lanjutan.
-- [ ] `main.css`: `- [x] Beri nama pakettheme` semua token DES §3 (dark default + light cream), font Geist Mono → JetBrains Mono → IBM Plex Mono.
+- [ ] `nuxt.config.ts` ARCH §8.1: `compatibilityVersion: 4`, modul `@nuxt/ui`, `routeRules` (`/login` SSR, `/dashboard/**` SPA, `/api/**` tanpa CORS), Nitro `node-server` + WebSocket, `build.transpile` paket `@sentinel/*`.
+- [ ] Pasang peer chart sesuai Nuxt UI v4.12 (D-05); fallback `@unovis/vue` hanya untuk korelasi lanjutan.
+- [ ] `main.css`: `@theme` semua token DES §3 (dark default + light cream), font Geist Mono → JetBrains Mono → IBM Plex Mono.
 
 ### P14.2 — Override komponen Nuxt UI
 
@@ -935,7 +935,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 ### P14.4 — TanStack Query & klien API
 
 - [ ] Plugin `app/plugins/vue-query.ts` (ARCH §8.2: `staleTime 10s`, `refetchOnWindowFocus`, `retry 1`).
-- [ ] Wrapper `$fetch` yang mengurai RFC 9457 menjadi error terstruktur; semua tipe dari `- [x] Beri nama paketsentinel/contracts`.
+- [ ] Wrapper `$fetch` yang mengurai RFC 9457 menjadi error terstruktur; semua tipe dari `@sentinel/contracts`.
 - [ ] Composable query/mutation per resource (monitors, checks, incidents, metrics, settings).
 
 ### P14.5 — Komponen bersama
@@ -1036,7 +1036,7 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P16.4 — Checklist verifikasi frontend
 
-- [ ] Jalankan seluruh daftar DES §10: stack, zero hardcoded colors, zero-leak UI, kontrak `- [x] Beri nama paketsentinel/contracts`, WebSocket fallback, aksesibilitas, E2E.
+- [ ] Jalankan seluruh daftar DES §10: stack, zero hardcoded colors, zero-leak UI, kontrak `@sentinel/contracts`, WebSocket fallback, aksesibilitas, E2E.
 
 ---
 
@@ -1085,7 +1085,7 @@ Dengan server target lokal yang dapat dikendalikan (OK/gagal/lambat) dan Telegra
 ### P18.1 — Dockerfile multi-stage
 
 - [ ] Perbaiki `bun.lock` (D-04); stage `base`, `dependencies`, `build-web`, `web-runner`, `worker-runner`.
-- [ ] Jalankan sebagai user non-root; pin tag image; verifikasi modul native (`- [x] Beri nama paketnode-rs/argon2`, libsodium) berjalan di `node:24-alpine`.
+- [ ] Jalankan sebagai user non-root; pin tag image; verifikasi modul native (`@node-rs/argon2`, libsodium) berjalan di `node:24-alpine`.
 - [ ] Verifikasi worker mengakses `packages/*` yang dibutuhkan runtime `tsx`.
 
 **Ref:** ARCH §11.1.
