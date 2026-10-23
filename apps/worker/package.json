@@ -1,0 +1,21 @@
+{
+  "name": "@sentinel/worker",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "echo 'worker dev placeholder'",
+    "build": "echo 'worker build placeholder'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sentinel/application": "workspace:*",
+    "@sentinel/contracts": "workspace:*",
+    "@sentinel/domain": "workspace:*",
+    "@sentinel/infra": "workspace:*"
+  }
+}
