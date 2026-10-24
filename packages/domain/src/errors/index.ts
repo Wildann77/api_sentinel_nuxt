@@ -1,9 +1,5 @@
-export abstract class DomainError extends Error {
-  public abstract readonly code: string;
+export * from "./domain-exception.js";
 
-  constructor(message: string) {
-    super(message);
-    this.name = new.target.name;
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+import { DomainException } from "./domain-exception.js";
+export const DomainError = DomainException;
+export type DomainError = DomainException;
