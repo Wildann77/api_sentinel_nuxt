@@ -1,4 +1,2 @@
-export interface DomainEvent {
-  readonly eventName: string;
-  readonly occurredOn: Date;
-}
+export * from "./domain-event.js";
+export * from "./incident-events.js";
