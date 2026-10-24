@@ -19,6 +19,7 @@
       "@sentinel/domain": ["./packages/domain/src/index.ts"],
       "@sentinel/domain/*": ["./packages/domain/src/*"],
       "@sentinel/application": ["./packages/application/src/index.ts"],
+      "@sentinel/application/testing": ["./packages/application/src/test-doubles/index.ts"],
       "@sentinel/application/*": ["./packages/application/src/*"],
       "@sentinel/infra": ["./packages/infra/src/index.ts"],
       "@sentinel/infra/*": ["./packages/infra/src/*"],
