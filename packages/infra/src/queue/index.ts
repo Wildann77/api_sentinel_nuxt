@@ -1,3 +1,1 @@
-export interface JobQueue {
-  readonly queueName: string;
-}
+export * from "./pg-boss-queue-adapter.js";
