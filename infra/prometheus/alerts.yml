@@ -1,0 +1,17 @@
+groups:
+  - name: sentinel_alerts
+    rules:
+      - alert: SentinelWorkerDown
+        expr: (time() - sentinel_worker_heartbeat_timestamp) > 60
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Worker API Sentinel berhenti berdetak (Dead-Man's Switch)"
+      - alert: SentinelHighJobLag
+        expr: sentinel_worker_job_lag_seconds > 30
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Antrean pemantauan mengalami backlog lebih dari 30 detik"
