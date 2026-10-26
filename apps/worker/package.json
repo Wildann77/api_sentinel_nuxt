@@ -8,8 +8,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "dev": "echo 'worker dev placeholder'",
-    "build": "echo 'worker build placeholder'",
+    "dev": "node --import tsx src/index.ts",
+    "start": "node --import tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -17,5 +17,8 @@
     "@sentinel/contracts": "workspace:*",
     "@sentinel/domain": "workspace:*",
     "@sentinel/infra": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }
