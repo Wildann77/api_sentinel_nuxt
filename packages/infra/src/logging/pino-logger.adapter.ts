@@ -135,7 +135,18 @@ export function createSafeErrorSerializer(
   baseSerializer: (err: Error) => Record<string, unknown> = pino.stdSerializers.err,
 ): (err: Error) => Record<string, unknown> {
   return (err: Error): Record<string, unknown> => {
-    const serialized = baseSerializer(err);
+    if (typeof err === "string") {
+      return { message: redactSensitiveText(err) };
+    }
+    if (!err || typeof err !== "object") {
+      return { message: String(err) };
+    }
+
+    const rawSerialized = baseSerializer(err);
+    if (!rawSerialized || typeof rawSerialized !== "object") {
+      return { message: redactSensitiveText(String(rawSerialized)) };
+    }
+    const serialized: Record<string, unknown> = { ...rawSerialized };
 
     if (typeof serialized.message === "string") {
       serialized.message = redactSensitiveText(serialized.message);
@@ -148,13 +159,14 @@ export function createSafeErrorSerializer(
       if (typeof serialized.cause === "string") {
         serialized.cause = redactSensitiveText(serialized.cause);
       } else if (typeof serialized.cause === "object" && serialized.cause !== null) {
-        const causeObj = serialized.cause as Record<string, unknown>;
+        const causeObj = { ...(serialized.cause as Record<string, unknown>) };
         if (typeof causeObj.message === "string") {
           causeObj.message = redactSensitiveText(causeObj.message);
         }
         if (typeof causeObj.stack === "string") {
           causeObj.stack = redactSensitiveText(causeObj.stack);
         }
+        serialized.cause = causeObj;
       }
     }
 
