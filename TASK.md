@@ -560,60 +560,60 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P6.1 — Request builder
 
-- [ ] Rakit method, header, body, auth (Bearer, Basic, API Key via header, Custom Header) dari rahasia hasil dekripsi (hanya jalur internal).
-- [ ] Terapkan deny-list header; abaikan `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`.
-- [ ] Tidak meneruskan kredensial internal aplikasi ke target.
+- [x] Rakit method, header, body, auth (Bearer, Basic, API Key via header, Custom Header) dari rahasia hasil dekripsi (hanya jalur internal).
+- [x] Terapkan deny-list header; abaikan `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`.
+- [x] Tidak meneruskan kredensial internal aplikasi ke target.
 
 **Ref:** ARCH §5.1.B, PRD §4.5/§4.6.
 
 ### P6.2 — Resolver DNS & validasi multi-record
 
-- [ ] Jika hostname IP literal → `net.isIP` + `NetworkPolicy`.
-- [ ] Jika domain → `dns.promises.resolve4/resolve6` (semua record, `{ all: true }`); tolak bila SALAH SATU IP terblokir.
-- [ ] Normalisasi IPv4-mapped / NAT64 / 6to4 sebelum validasi.
-- [ ] Durasi DNS dicatat terpisah dari latency (ARCH §5.1.B).
+- [x] Jika hostname IP literal → `net.isIP` + `NetworkPolicy`.
+- [x] Jika domain → `dns.promises.resolve4/resolve6` (semua record, `{ all: true }`); tolak bila SALAH SATU IP terblokir.
+- [x] Normalisasi IPv4-mapped / NAT64 / 6to4 sebelum validasi.
+- [x] Durasi DNS dicatat terpisah dari latency (ARCH §5.1.B).
 
 **Ref:** ARCH §5.1, ADR 002.
 
 ### P6.3 — Agent socket IP-pinning
 
-- [ ] Custom `lookup` mengembalikan IP tervalidasi; socket TCP langsung ke IP numerik.
-- [ ] Pertahankan header `Host` dan TLS SNI (`servername`) sesuai domain asli → anti DNS rebinding TOCTOU.
-- [ ] Timeout: connect 5.000 ms, headers 5.000 ms, total `timeoutMs` via `AbortSignal.timeout()`; batalkan operasi jaringan saat timeout.
-- [ ] Redirect dinonaktifkan; respons 3xx → kategori `REDIRECT_NOT_ALLOWED` (D-14).
-- [ ] Ukur latency dari awal koneksi socket hingga header+body selesai.
+- [x] Custom `lookup` mengembalikan IP tervalidasi; socket TCP langsung ke IP numerik.
+- [x] Pertahankan header `Host` dan TLS SNI (`servername`) sesuai domain asli → anti DNS rebinding TOCTOU.
+- [x] Timeout: connect 5.000 ms, headers 5.000 ms, total `timeoutMs` via `AbortSignal.timeout()`; batalkan operasi jaringan saat timeout.
+- [x] Redirect dinonaktifkan; respons 3xx → kategori `REDIRECT_NOT_ALLOWED` (D-14).
+- [x] Ukur latency dari awal koneksi socket hingga header+body selesai.
 
 **Ref:** ARCH §5.1, PRD §4.5/§4.8.
 
 ### P6.4 — Penanganan respons
 
-- [ ] Batas body 2 MB dihitung pada stream SETELAH dekompresi (gzip/deflate/br bomb guard) → `RESPONSE_SIZE_EXCEEDED`, stream diputus.
-- [ ] Bila monitor tidak butuh evaluasi body JSON, `destroy()` stream setelah header diterima.
-- [ ] Simpan response headers + cuplikan body ≤ 5 KB (tersanitasi) ke `diagnostics`; simpan `pinned_ip`.
+- [x] Batas body 2 MB dihitung pada stream SETELAH dekompresi (gzip/deflate/br bomb guard) → `RESPONSE_SIZE_EXCEEDED`, stream diputus.
+- [x] Bila monitor tidak butuh evaluasi body JSON, `destroy()` stream setelah header diterima.
+- [x] Simpan response headers + cuplikan body ≤ 5 KB (tersanitasi) ke `diagnostics`; simpan `pinned_ip`.
 
 **Ref:** ARCH §5.1.B, DES §5.5.
 
 ### P6.5 — Klasifikasi error ke `FailureCategory`
 
-- [ ] Pemetaan: DNS gagal, `ECONNREFUSED`, timeout koneksi, kegagalan TLS, status tidak sesuai, ukuran melebihi batas, abort eksekusi, SSRF diblokir, redirect.
-- [ ] Pesan diagnostik aman (tanpa rahasia).
+- [x] Pemetaan: DNS gagal, `ECONNREFUSED`, timeout koneksi, kegagalan TLS, status tidak sesuai, ukuran melebihi batas, abort eksekusi, SSRF diblokir, redirect.
+- [x] Pesan diagnostik aman (tanpa rahasia).
 
 **Ref:** PRD §4.5 daftar kegagalan, US 20.
 
 ### P6.6 — `NodeHttpSsrfProbeAdapter` (rangkaian)
 
-- [ ] Implementasi `NetworkProbePort` menggabungkan P6.1–P6.5, menghasilkan `ProbeOutcome` (status, headers, body stream/teks terbatas, latency, kategori).
-- [ ] Orkestrasi pada application: probe → `AssertionEngine` → `CheckResult` (PRD §4.5 langkah 9–10).
+- [x] Implementasi `NetworkProbePort` menggabungkan P6.1–P6.5, menghasilkan `ProbeOutcome` (status, headers, body stream/teks terbatas, latency, kategori).
+- [x] Orkestrasi pada application: probe → `AssertionEngine` → `CheckResult` (PRD §4.5 langkah 9–10).
 
 ### P6.7 — Pengujian keamanan SSRF (cakupan 100%)
 
-- [ ] Tiap CIDR terblokir (termasuk `169.254.169.254`, `fd00:ec2::254`).
-- [ ] Multi-record A/AAAA dengan satu IP privat → tolak.
-- [ ] Simulasi DNS rebinding (mock DNS yang menukar IP) tidak dapat menembus karena IP dipin.
-- [ ] Literal numerik desimal/hex/octal; IPv4-mapped; NAT64; 6to4.
-- [ ] Userinfo ditolak; skema non-http ditolak; proxy env diabaikan.
-- [ ] Redirect, timeout, body besar, gzip bomb, kegagalan TLS.
-- [ ] Verifikasi metode, header, body, dan keempat metode auth tiba benar di server uji.
+- [x] Tiap CIDR terblokir (termasuk `169.254.169.254`, `fd00:ec2::254`).
+- [x] Multi-record A/AAAA dengan satu IP privat → tolak.
+- [x] Simulasi DNS rebinding (mock DNS yang menukar IP) tidak dapat menembus karena IP dipin.
+- [x] Literal numerik desimal/hex/octal; IPv4-mapped; NAT64; 6to4.
+- [x] Userinfo ditolak; skema non-http ditolak; proxy env diabaikan.
+- [x] Redirect, timeout, body besar, gzip bomb, kegagalan TLS.
+- [x] Verifikasi metode, header, body, dan keempat metode auth tiba benar di server uji.
 
 **Selesai bila:** seluruh skenario lulus; cakupan SSRF guard 100%.
 **Ref:** ARCH §13, PRD §5.3.
@@ -624,47 +624,47 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P7.1 — Handler error global RFC 9457
 
-- [ ] Plugin Nitro `server/plugins/error-handler.ts` (ARCH §9.1.B): petakan `DomainException` → status, `application/problem+json`, `Retry-After` untuk 429, `invalidParams` untuk validasi.
-- [ ] Error tak terduga → 500 generik, stack trace hanya di non-production, log via logger tersanitasi.
+- [x] Plugin Nitro `server/plugins/error-handler.ts` (ARCH §9.1.B): petakan `DomainException` → status, `application/problem+json`, `Retry-After` untuk 429, `invalidParams` untuk validasi.
+- [x] Error tak terduga → 500 generik, stack trace hanya di non-production, log via logger tersanitasi.
 
 **Selesai bila:** uji tiap tipe exception menghasilkan payload sesuai contoh ARCH §9.1.C.
 
 ### P7.2 — Composition root web
 
-- [ ] `server/utils/container.ts`: rakit pool, adapter, repository, use case (singleton per proses).
-- [ ] Validasi env saat boot (P1.7).
+- [x] `server/utils/container.ts`: rakit pool, adapter, repository, use case (singleton per proses).
+- [x] Validasi env saat boot (P1.7).
 
 ### P7.3 — Use case autentikasi
 
-- [ ] `AuthenticateUserUseCase`: validasi input, cari user, verifikasi Argon2id; jalur username tak dikenal tetap menjalankan hash dummy; pesan generik `"Kredensial tidak valid"`; terapkan rate limit Tier 1.
-- [ ] Token acak 256-bit (`crypto.randomBytes(32)`); simpan `SHA-256(token)` (opsional HMAC dengan pepper D-20), IP & user-agent.
-- [ ] `ValidateSessionUseCase`: idle TTL 24 jam (sliding), absolute TTL 7 hari.
-- [ ] `RevokeSessionUseCase`; `ChangeOwnerPasswordUseCase` (D-09, cabut sesi lain).
+- [x] `AuthenticateUserUseCase`: validasi input, cari user, verifikasi Argon2id; jalur username tak dikenal tetap menjalankan hash dummy; pesan generik `"Kredensial tidak valid"`; terapkan rate limit Tier 1.
+- [x] Token acak 256-bit (`crypto.randomBytes(32)`); simpan `SHA-256(token)` (opsional HMAC dengan pepper D-20), IP & user-agent.
+- [x] `ValidateSessionUseCase`: idle TTL 24 jam (sliding), absolute TTL 7 hari.
+- [x] `RevokeSessionUseCase`; `ChangeOwnerPasswordUseCase` (D-09, cabut sesi lain).
 
 **Selesai bila:** unit test dengan fake; edge case: sesi kedaluwarsa idle & absolut.
 **Ref:** ARCH §5.3, PRD §4.3, US 1–3.
 
 ### P7.4 — CLI pembuatan akun pemilik
 
-- [ ] `bun run owner:create` (D-08): input username/password (atau env), hash Argon2id, tolak jika user sudah ada, pesan jelas.
+- [x] `bun run owner:create` (D-08): input username/password (atau env), hash Argon2id, tolak jika user sudah ada, pesan jelas.
 - [ ] Dokumentasikan di README (F18).
 
 **Selesai bila:** uji integrasi: user kedua ditolak oleh `uq_single_owner_guard`.
 
 ### P7.5 — Middleware Nitro
 
-- [ ] Security headers: CSP ketat yang kompatibel Nuxt/Nuxt UI, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
-- [ ] CSRF: validasi `Origin` & `Host` untuk `POST/PATCH/PUT/DELETE` dan handshake WebSocket.
-- [ ] Ekstraksi IP client via `X-Forwarded-For` hanya dari `TRUSTED_PROXIES` (CIDR).
-- [ ] Middleware sesi: cookie → `ValidateSession`, perpanjang idle window; endpoint publik dikecualikan (`/api/auth/login`, `/healthz`, `/readyz`, `/metrics` sesuai kebijakan).
-- [ ] Rate limit Tier 3 (120/menit/user).
+- [x] Security headers: CSP ketat yang kompatibel Nuxt/Nuxt UI, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
+- [x] CSRF: validasi `Origin` & `Host` untuk `POST/PATCH/PUT/DELETE` dan handshake WebSocket.
+- [x] Ekstraksi IP client via `X-Forwarded-For` hanya dari `TRUSTED_PROXIES` (CIDR).
+- [x] Middleware sesi: cookie → `ValidateSession`, perpanjang idle window; endpoint publik dikecualikan (`/api/auth/login`, `/healthz`, `/readyz`, `/metrics` sesuai kebijakan).
+- [x] Rate limit Tier 3 (120/menit/user).
 
 **Ref:** ARCH §5.3.5–6, PRD §4.3.
 
 ### P7.6 — Endpoint autentikasi
 
-- [ ] `POST /api/auth/login` (set cookie `HttpOnly`, `SameSite=Lax`, `Path=/`, `Secure` otomatis di HTTPS), `POST /api/auth/logout` (hapus sesi + cookie), `GET /api/auth/me`.
-- [ ] `PUT /api/settings/account/password` (D-09).
+- [x] `POST /api/auth/login` (set cookie `HttpOnly`, `SameSite=Lax`, `Path=/`, `Secure` otomatis di HTTPS), `POST /api/auth/logout` (hapus sesi + cookie), `GET /api/auth/me`.
+- [x] `PUT /api/settings/account/password` (D-09).
 
 **Selesai bila:** uji API: 401 tanpa sesi, atribut cookie benar, 429 + `Retry-After` setelah 5 gagal, tidak ada pembedaan username/password salah.
 **Ref:** PRD §5.2/§5.6 (poin 11).
@@ -675,39 +675,39 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P8.1 — Create & Update monitor
 
-- [ ] Skema Zod: nama ≤ 100, URL (skema + SSRF pre-check), method, header (deny-list), body, auth, assertion ≤ 10, interval, timeout.
-- [ ] Enkripsi `encryptedHeaders`, `encryptedBody`, `encryptedAuthConfig` dengan AAD `monitorId:field:<name>`; hitung `headerKeys`.
-- [ ] Monitor baru: aktif, `UNKNOWN`, `nextRunAt` dihitung dari aktivasi + interval.
-- [ ] Update: OCC (`version`); hanya re-enkripsi bila nilai berubah; placeholder rahasia ter-mask tidak menimpa nilai tersimpan.
-- [ ] Validasi gagal → tidak ada penyimpanan, 400 dengan `invalidParams`.
+- [x] Skema Zod: nama ≤ 100, URL (skema + SSRF pre-check), method, header (deny-list), body, auth, assertion ≤ 10, interval, timeout.
+- [x] Enkripsi `encryptedHeaders`, `encryptedBody`, `encryptedAuthConfig` dengan AAD `monitorId:field:<name>`; hitung `headerKeys`.
+- [x] Monitor baru: aktif, `UNKNOWN`, `nextRunAt` dihitung dari aktivasi + interval.
+- [x] Update: OCC (`version`); hanya re-enkripsi bila nilai berubah; placeholder rahasia ter-mask tidak menimpa nilai tersimpan.
+- [x] Validasi gagal → tidak ada penyimpanan, 400 dengan `invalidParams`.
 
 **Ref:** PRD §4.4, ARCH §6.3.B, US 4–11, 13.
 
 ### P8.2 — Pause, Resume, Delete
 
-- [ ] `PauseMonitorUseCase`: `PAUSED`; insiden terbuka tetap terbuka; batalkan job terjadwal.
-- [ ] `ResumeMonitorUseCase`: `UNKNOWN`, `nextRunAt = now`.
-- [ ] `DeleteMonitorUseCase` (D-17): hard delete + cascade, batalkan job pg-boss, tidak ada job yatim.
+- [x] `PauseMonitorUseCase`: `PAUSED`; insiden terbuka tetap terbuka; batalkan job terjadwal.
+- [x] `ResumeMonitorUseCase`: `UNKNOWN`, `nextRunAt = now`.
+- [x] `DeleteMonitorUseCase` (D-17): hard delete + cascade, batalkan job pg-boss, tidak ada job yatim.
 
 **Ref:** PRD §4.4, ARCH §3.2.
 
 ### P8.3 — Query monitor
 
-- [ ] `GET /api/monitors`: filter status, pencarian nama/URL, cursor, `sparkline` 20 titik (D-19).
-- [ ] `GET /api/monitors/:id`: konfigurasi tersanitasi (hanya `headerKeys`, `authType`, tanpa nilai rahasia).
+- [x] `GET /api/monitors`: filter status, pencarian nama/URL, cursor, `sparkline` 20 titik (D-19).
+- [x] `GET /api/monitors/:id`: konfigurasi tersanitasi (hanya `headerKeys`, `authType`, tanpa nilai rahasia).
 
 **Ref:** US 14, ARCH §9.3.
 
 ### P8.4 — Handler REST monitor
 
-- [ ] `POST /api/monitors`, `PATCH /api/monitors/:id`, `DELETE /api/monitors/:id`, `POST /api/monitors/:id/pause`, `POST /api/monitors/:id/resume`.
-- [ ] Validasi Zod di server; kode status sesuai PRD §4.19 (400/401/403/404/409/429/500).
+- [x] `POST /api/monitors`, `PATCH /api/monitors/:id`, `DELETE /api/monitors/:id`, `POST /api/monitors/:id/pause`, `POST /api/monitors/:id/resume`.
+- [x] Validasi Zod di server; kode status sesuai PRD §4.19 (400/401/403/404/409/429/500).
 
 ### P8.5 — Pengujian slice
 
-- [ ] Integrasi: CRUD, jeda/lanjut/hapus, 409 pada update konkuren, 11 aturan ditolak, URL privat ditolak (SSRF di create).
-- [ ] Sweep kebocoran: tidak ada nilai rahasia pada respons, log, CSV (uji dengan nilai rahasia unik).
-- [ ] Penolakan tanpa autentikasi pada semua endpoint.
+- [x] Integrasi: CRUD, jeda/lanjut/hapus, 409 pada update konkuren, 11 aturan ditolak, URL privat ditolak (SSRF di create).
+- [x] Sweep kebocoran: tidak ada nilai rahasia pada respons, log, CSV (uji dengan nilai rahasia unik).
+- [x] Penolakan tanpa autentikasi pada semua endpoint.
 
 **Ref:** PRD §5.2.
 
@@ -717,60 +717,61 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P9.1 — Bootstrap worker
 
-- [ ] `apps/worker/src/index.ts`: env, container, start pg-boss (skema `pgboss`, hak `CREATE`), `createQueue` untuk `probe:check` (`stately`), `notification:send` (`stately`), antrean maintenance, dan DLQ.
-- [ ] Graceful shutdown (SIGTERM/SIGINT): berhenti mengambil job, tunggu job aktif, tutup pool.
-- [ ] Heartbeat setiap 15 dtk ke `worker_heartbeats` dan gauge metrik.
-- [ ] HTTP listener mandiri `node:http` port `WORKER_PORT` (3001) untuk `/healthz` dan `/metrics`.
-- [ ] Jalankan via `node --import tsx src/index.ts`.
+- [x] `apps/worker/src/index.ts`: env, container, start pg-boss (skema `pgboss`, hak `CREATE`), `createQueue` untuk `probe:check` (`stately`), `notification:send` (`stately`), antrean maintenance, dan DLQ.
+- [x] Graceful shutdown (SIGTERM/SIGINT): berhenti mengambil job, tunggu job aktif, tutup pool.
+- [x] Heartbeat setiap 15 dtk ke `worker_heartbeats` dan gauge metrik.
+- [x] HTTP listener mandiri `node:http` port `WORKER_PORT` (3001) untuk `/healthz` dan `/metrics`.
+- [x] Jalankan via `node --import tsx src/index.ts`.
 
 **Ref:** ARCH §7.1, §9.5.C, §11.1; PRD §4.2.B/§4.20.
 
 ### P9.2 — Scheduler loop
 
-- [ ] Setiap 5 dtk: transaksi `SELECT ... WHERE is_active AND next_run_at <= NOW() FOR UPDATE SKIP LOCKED LIMIT 50`.
-- [ ] Hitung `next_run_at = NOW() + interval ± 5% jitter` (tanpa catch-up beruntun pasca-downtime; PRD §4.9).
-- [ ] Enqueue `probe:check` dalam transaksi yang sama (`singletonKey = monitorId`, adapter `fromDrizzle`), sisipkan `__traceparent`, cek `null`.
-- [ ] Bila pemeriksaan sebelumnya belum selesai → tidak menumpuk (dedupe policy).
+- [x] Setiap 5 dtk: transaksi `SELECT ... WHERE is_active AND next_run_at <= NOW() FOR UPDATE SKIP LOCKED LIMIT 50`.
+- [x] Hitung `next_run_at = NOW() + interval ± 5% jitter` (tanpa catch-up beruntun pasca-downtime; PRD §4.9).
+- [x] Enqueue `probe:check` dalam transaksi yang sama (`singletonKey = monitorId`, adapter `fromDrizzle`), sisipkan `__traceparent`, cek `null`.
+- [x] Bila pemeriksaan sebelumnya belum selesai → tidak menumpuk (dedupe policy).
 
 **Ref:** ARCH §7.1.A, PRD §4.9, US 15.
 
 ### P9.3 — Konsumen probe (`ExecuteScheduledCheckUseCase`)
 
-- [ ] Konkurensi 20; re-verifikasi monitor masih ada & aktif.
-- [ ] Jalankan probe (F6) + AssertionEngine di luar transaksi DB.
-- [ ] UoW tunggal: `SELECT ... FOR UPDATE` monitor → insert `CheckResult` → `recordCheckFailure/Success` → buat/update/resolve `incidents` → insert `notification_deliveries` `PENDING` → `boss.send('notification:send', ..., singletonKey incidentId:type)` → `NOTIFY` → commit.
-- [ ] Ketahanan: kegagalan downstream (SSRF, timeout, Telegram) tidak membatalkan simpan hasil; kegagalan DB tidak menandai sukses.
-- [ ] Hitung `sentinel_worker_job_lag_seconds`.
+- [x] Konkurensi 20; re-verifikasi monitor masih ada & aktif.
+- [x] Jalankan probe (F6) + AssertionEngine di luar transaksi DB.
+- [x] UoW tunggal: `SELECT ... FOR UPDATE` monitor → insert `CheckResult` → `recordCheckFailure/Success` → buat/update/resolve `incidents` → insert `notification_deliveries` `PENDING` → `boss.send('notification:send', ..., singletonKey incidentId:type)` → `NOTIFY` → commit.
+- [x] Ketahanan: kegagalan downstream (SSRF, timeout, Telegram) tidak membatalkan simpan hasil; kegagalan DB tidak menandai sukses.
+- [x] Hitung `sentinel_worker_job_lag_seconds`.
+
 
 **Ref:** ARCH §6.3.A, §7.1.B, PRD §4.10/§4.14, US 16, 21–25.
 
 ### P9.4 — Pemeriksaan manual & dry-run
 
-- [ ] `POST /api/monitors/:id/check`: rate limit Tier 2, enqueue prioritas, respons `202` + `checkId`; klien polling lewat riwayat (PRD §4.19).
-- [ ] `ExecuteManualCheckUseCase`: simpan hasil `trigger_type = MANUAL`, TIDAK mengubah counter/insiden/jadwal (D-13); batas konkurensi & timeout.
-- [ ] `POST /api/monitors/test` (D-10): jalankan konfigurasi yang belum disimpan, kembalikan ringkasan (status, latency, checklist assertion), tidak menyimpan.
+- [x] `POST /api/monitors/:id/check`: rate limit Tier 2, enqueue prioritas, respons `202` + `checkId`; klien polling lewat riwayat (PRD §4.19).
+- [x] `ExecuteManualCheckUseCase`: simpan hasil `trigger_type = MANUAL`, TIDAK mengubah counter/insiden/jadwal (D-13); batas konkurensi & timeout.
+- [x] `POST /api/monitors/test` (D-10): jalankan konfigurasi yang belum disimpan, kembalikan ringkasan (status, latency, checklist assertion), tidak menyimpan.
 
 **Ref:** US 12, ARCH §5.3.5 Tier 2, DES §5.4.
 
 ### P9.5 — Job maintenance (cron pg-boss)
 
-- [ ] Cleanup `rate_limits` kedaluwarsa (per jam).
-- [ ] Cleanup `sessions` kedaluwarsa.
-- [ ] Rollup `monitor_metrics_hourly` (idempotent).
-- [ ] Pemeliharaan partisi + retensi (F4.4).
-- [ ] Deteksi job macet/backlog (log + metrik).
+- [x] Cleanup `rate_limits` kedaluwarsa (per jam).
+- [x] Cleanup `sessions` kedaluwarsa.
+- [x] Rollup `monitor_metrics_hourly` (idempotent).
+- [x] Pemeliharaan partisi + retensi (F4.4).
+- [x] Deteksi job macet/backlog (log + metrik).
 
 **Ref:** ARCH §5.3.5, §6.4.B; D-06, D-07.
 
 ### P9.6 — Pengujian worker & scheduler
 
-- [ ] Monitor jatuh tempo dijalankan; yang dijeda tidak.
-- [ ] Worker hidup kembali menemukan pekerjaan tertinggal tanpa lonjakan.
-- [ ] Dua worker tidak mengambil pekerjaan sama.
-- [ ] Request lambat tidak menumpuk pekerjaan.
-- [ ] Timeout dicatat sebagai kegagalan.
-- [ ] Gangguan DB tidak menghilangkan pekerjaan secara diam-diam.
-- [ ] Manual check tidak merusak jadwal.
+- [x] Monitor jatuh tempo dijalankan; yang dijeda tidak.
+- [x] Worker hidup kembali menemukan pekerjaan tertinggal tanpa lonjakan.
+- [x] Dua worker tidak mengambil pekerjaan sama.
+- [x] Request lambat tidak menumpuk pekerjaan.
+- [x] Timeout dicatat sebagai kegagalan.
+- [x] Gangguan DB tidak menghilangkan pekerjaan secara diam-diam.
+- [x] Manual check tidak merusak jadwal.
 
 **Ref:** PRD §5.4.
 
@@ -780,42 +781,44 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P10.1 — Query & endpoint insiden
 
-- [ ] `GET /api/incidents` (terbuka/terselesaikan, filter, cursor) dan `GET /api/incidents/:id` (riwayat kegagalan, penyebab, ringkasan notifikasi `[DISPATCHED: n]`).
-- [ ] DTO: waktu mulai/pulih, durasi, penyebab utama, status `OPEN/RECOVERING/RESOLVED` turunan.
+- [x] `GET /api/incidents` (terbuka/terselesaikan, filter, cursor) dan `GET /api/incidents/:id` (riwayat kegagalan, penyebab, ringkasan notifikasi `[DISPATCHED: n]`).
+- [x] DTO: waktu mulai/pulih, durasi, penyebab utama, status `OPEN/RECOVERING/RESOLVED` turunan.
 
 **Ref:** US 24, 25; DES §5.6.
 
+
 ### P10.2 — TelegramBotNotificationAdapter
 
-- [ ] Kirim via Bot API (`TELEGRAM_API_BASE_URL` dapat diganti untuk mock).
-- [ ] Escaper MarkdownV2 (nama monitor & error disanitasi); templat pesan "INSIDEN TERBUKA" dan "INSIDEN DIPULIHKAN" (PRD §4.15).
-- [ ] Tangani 429 + `retry_after`; timeout request; ringkasan error aman (tanpa token).
+- [x] Kirim via Bot API (`TELEGRAM_API_BASE_URL` dapat diganti untuk mock).
+- [x] Escaper MarkdownV2 (nama monitor & error disanitasi); templat pesan "INSIDEN TERBUKA" dan "INSIDEN DIPULIHKAN" (PRD §4.15).
+- [x] Tangani 429 + `retry_after`; timeout request; ringkasan error aman (tanpa token).
 
 **Ref:** ARCH §4.2, §7.1.C.
 
+
 ### P10.3 — `DispatchNotificationUseCase`
 
-- [ ] Ambil konfigurasi aktif, dekripsi token (AAD D-21), bentuk pesan dari data insiden.
-- [ ] Sukses → `SENT` + `last_attempt_at`; gagal → `FAILED`, `retry_count++`, `safe_error_summary`.
-- [ ] Retry dengan batas & backoff (konfigurasi pg-boss `retryLimit`, `retryBackoff`); 429 memakai `retry_after`.
-- [ ] Deduplikasi (`singletonKey incidentId:type`); kegagalan berulang dalam insiden yang sama tidak membuat notifikasi baru (US 29).
-- [ ] Konfigurasi belum ada/nonaktif → status gagal aman, tidak mengubah hasil pemeriksaan.
+- [x] Ambil konfigurasi aktif, dekripsi token (AAD D-21), bentuk pesan dari data insiden.
+- [x] Sukses → `SENT` + `last_attempt_at`; gagal → `FAILED`, `retry_count++`, `safe_error_summary`.
+- [x] Retry dengan batas & backoff (konfigurasi pg-boss `retryLimit`, `retryBackoff`); 429 memakai `retry_after`.
+- [x] Deduplikasi (`singletonKey incidentId:type`); kegagalan berulang dalam insiden yang sama tidak membuat notifikasi baru (US 29).
+- [x] Konfigurasi belum ada/nonaktif → status gagal aman, tidak mengubah hasil pemeriksaan.
 
 **Ref:** PRD §4.15, US 28–29.
 
 ### P10.4 — Endpoint pengaturan Telegram
 
-- [ ] `GET /api/settings/telegram` (status tanpa token), `PUT` (simpan terenkripsi, validasi token & chat ID), `POST /api/settings/telegram/test` (ping uji).
-- [ ] Token tidak pernah dikembalikan/di-log.
+- [x] `GET /api/settings/telegram` (status tanpa token), `PUT` (simpan terenkripsi, validasi token & chat ID), `POST /api/settings/telegram/test` (ping uji).
+- [x] Token tidak pernah dikembalikan/di-log.
 
 **Ref:** US 26, 27; ARCH §9.3.
 
 ### P10.5 — Pengujian notifikasi
 
-- [ ] Pembukaan → tepat satu event; pemulihan → tepat satu event; kegagalan berulang tidak menghasilkan event baru.
-- [ ] Gangguan Telegram tidak mengubah hasil pemeriksaan; retry berbatas.
-- [ ] Token bot tidak muncul di log/respons.
-- [ ] Gunakan API Telegram tiruan; satu pengujian integrasi manual ke bot nyata terdokumentasi.
+- [x] Pembukaan → tepat satu event; pemulihan → tepat satu event; kegagalan berulang tidak menghasilkan event baru.
+- [x] Gangguan Telegram tidak mengubah hasil pemeriksaan; retry berbatas.
+- [x] Token bot tidak muncul di log/respons.
+- [x] Gunakan API Telegram tiruan; satu pengujian integrasi manual ke bot nyata terdokumentasi.
 
 **Ref:** PRD §5.5.
 
@@ -825,27 +828,27 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P11.1 — Riwayat pemeriksaan
 
-- [ ] `GET /api/monitors/:id/checks`: cursor, filter rentang waktu, tampil label `MANUAL`.
-- [ ] Detail check untuk drawer inspeksi (diagnostics tersanitasi).
-- [ ] `GET /api/checks/recent?limit=10` (feed dashboard, D-19).
+- [x] `GET /api/monitors/:id/checks`: cursor, filter rentang waktu, tampil label `MANUAL`.
+- [x] Detail check untuk drawer inspeksi (diagnostics tersanitasi).
+- [x] `GET /api/checks/recent?limit=10` (feed dashboard, D-19).
 
 **Ref:** US 16, 17, 20.
 
 ### P11.2 — Metrik uptime & latency
 
-- [ ] `GET /api/monitors/:id/metrics` (24h/7d/30d; uptime %, avg, p95, p99; N/A saat kosong).
-- [ ] `GET /api/metrics/summary` (total monitor, breakdown UP/DEGRADED/DOWN/PAUSED/UNKNOWN, insiden terbuka, uptime, latency, kegagalan terbaru).
-- [ ] `GET /api/metrics/latency?range=` untuk grafik komposit (D-19).
-- [ ] Waktu dihitung UTC, ditampilkan sesuai zona pengguna.
+- [x] `GET /api/monitors/:id/metrics` (24h/7d/30d; uptime %, avg, p95, p99; N/A saat kosong).
+- [x] `GET /api/metrics/summary` (total monitor, breakdown UP/DEGRADED/DOWN/PAUSED/UNKNOWN, insiden terbuka, uptime, latency, kegagalan terbaru).
+- [x] `GET /api/metrics/latency?range=` untuk grafik komposit (D-19).
+- [x] Waktu dihitung UTC, ditampilkan sesuai zona pengguna.
 
 **Ref:** US 18, 19; PRD §4.11/§4.12/§4.16.
 
 ### P11.3 — Ekspor CSV
 
-- [ ] `GET /api/reports/export.csv?type=checks|incidents&monitorId&from&to` (D-18), streaming cursor DB (tanpa memuat seluruh data).
-- [ ] `sanitizeCsvValue` persis ARCH §5.4 (prefix `'` untuk `= + - @ \t \r`; kolom numerik tidak diberi prefix; kutip RFC 4180).
-- [ ] Kolom: waktu, nama monitor, hasil, status HTTP, latency, kategori kegagalan, mulai/pulih insiden; header `Content-Disposition`.
-- [ ] Tidak ada password/token/API key/header auth/kunci enkripsi.
+- [x] `GET /api/reports/export.csv?type=checks|incidents&monitorId&from&to` (D-18), streaming cursor DB (tanpa memuat seluruh data).
+- [x] `sanitizeCsvValue` persis ARCH §5.4 (prefix `'` untuk `= + - @ \t \r`; kolom numerik tidak diberi prefix; kutip RFC 4180).
+- [x] Kolom: waktu, nama monitor, hasil, status HTTP, latency, kategori kegagalan, mulai/pulih insiden; header `Content-Disposition`.
+- [x] Tidak ada password/token/API key/header auth/kunci enkripsi.
 
 **Selesai bila:** uji formula injection, quoting, backpressure data besar, tanpa rahasia.
 **Ref:** US 30, PRD §4.17.
@@ -856,29 +859,29 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P12.1 — Emisi event dari worker
 
-- [ ] Dalam UoW: `NOTIFY` `CHECK_COMPLETED` (monitorId, status, durationMs, executedAt) dan `INCIDENT_TRANSITION` (OPENED/RECOVERED).
+- [x] Dalam UoW: `NOTIFY` `CHECK_COMPLETED` (monitorId, status, durationMs, executedAt) dan `INCIDENT_TRANSITION` (OPENED/RECOVERED).
 
 ### P12.2 — Plugin LISTEN di web
 
-- [ ] Plugin Nitro `server/plugins` membuka satu `pg.Client`, `LISTEN sentinel_events`, reconnect dengan backoff.
-- [ ] Broadcast ke peer WebSocket (crossws pub/sub).
+- [x] Plugin Nitro `server/plugins` membuka satu `pg.Client`, `LISTEN sentinel_events`, reconnect dengan backoff.
+- [x] Broadcast ke peer WebSocket (crossws pub/sub).
 
 ### P12.3 — Handler WebSocket `/api/ws`
 
-- [ ] Aktifkan `nitro.experimental.websocket` (Nitro v2 pada Nuxt 4; bila Nitro v3 gunakan `features.websocket`) dan `defineWebSocketHandler`.
-- [ ] Hook `upgrade`: validasi cookie sesi + `Origin`.
-- [ ] Pesan klien `{ action: "subscribe", monitorId }`; broadcast sesuai kontrak ARCH §9.4; ping/pong.
+- [x] Aktifkan `nitro.experimental.websocket` (Nitro v2 pada Nuxt 4; bila Nitro v3 gunakan `features.websocket`) dan `defineWebSocketHandler`.
+- [x] Hook `upgrade`: validasi cookie sesi + `Origin`.
+- [x] Pesan klien `{ action: "subscribe", monitorId }`; broadcast sesuai kontrak ARCH §9.4; ping/pong.
 
 ### P12.4 — Klien WebSocket (composable)
 
-- [ ] `useSentinelSocket`: status `LIVE` / `SYNCING` / `DISCONNECTED`, reconnect eksponensial, subscribe ulang.
-- [ ] Saat reconnect berhasil → `queryClient.invalidateQueries()` (resync ARCH §7.2.4).
-- [ ] Event memperbarui cache TanStack Query dan memicu kedip baris 500 ms.
+- [x] `useSentinelSocket`: status `LIVE` / `SYNCING` / `DISCONNECTED`, reconnect eksponensial, subscribe ulang.
+- [x] Saat reconnect berhasil → `queryClient.invalidateQueries()` (resync ARCH §7.2.4).
+- [x] Event memperbarui cache TanStack Query dan memicu kedip baris 500 ms.
 
 ### P12.5 — Pengujian real-time
 
-- [ ] Integrasi: NOTIFY → WS peer menerima; WS tanpa sesi ditolak; Origin salah ditolak.
-- [ ] Putus koneksi LISTEN/WS → resync benar, tanpa data basi.
+- [x] Integrasi: NOTIFY → WS peer menerima; WS tanpa sesi ditolak; Origin salah ditolak.
+- [x] Putus koneksi LISTEN/WS → resync benar, tanpa data basi.
 
 **Ref:** ARCH §7.2, §9.4.
 
@@ -888,31 +891,31 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P13.1 — OpenTelemetry
 
-- [ ] `@opentelemetry/sdk-node` di web & worker; ekspor OTLP HTTP ke Jaeger.
-- [ ] Propagasi W3C `traceparent` lewat payload job (`__traceparent`).
-- [ ] Span: `queue.wait_duration`, `probe.dns_lookup`, `probe.tcp_connect`, `probe.tls_handshake`, `probe.response_transfer`, `assertion.evaluation`, `db.transaction.save`, `notification.telegram_send`.
+- [x] `@opentelemetry/sdk-node` di web & worker; ekspor OTLP HTTP ke Jaeger.
+- [x] Propagasi W3C `traceparent` lewat payload job (`__traceparent`).
+- [x] Span: `queue.wait_duration`, `probe.dns_lookup`, `probe.tcp_connect`, `probe.tls_handshake`, `probe.response_transfer`, `assertion.evaluation`, `db.transaction.save`, `notification.telegram_send`.
 
 **Ref:** ARCH §9.5.A.
 
 ### P13.2 — Metrik Prometheus
 
-- [ ] `/metrics` di web & worker: `sentinel_probe_duration_ms` (bucket 50…10000), `sentinel_probe_total`, `sentinel_incidents_active`, `sentinel_worker_job_lag_seconds`, `sentinel_worker_heartbeat_timestamp`.
-- [ ] Perhatikan kardinalitas label `monitor_id`.
+- [x] `/metrics` di web & worker: `sentinel_probe_duration_ms` (bucket 50…10000), `sentinel_probe_total`, `sentinel_incidents_active`, `sentinel_worker_job_lag_seconds`, `sentinel_worker_heartbeat_timestamp`.
+- [x] Perhatikan kardinalitas label `monitor_id`.
 
 **Ref:** ARCH §9.5.B.
 
 ### P13.3 — Health endpoints
 
-- [ ] Web: `/healthz` (liveness), `/readyz` (cek koneksi DB); worker: `/healthz`.
-- [ ] Tangani DB mati tanpa mengklaim data tersimpan (PRD §4.20).
+- [x] Web: `/healthz` (liveness), `/readyz` (cek koneksi DB); worker: `/healthz`.
+- [x] Tangani DB mati tanpa mengklaim data tersimpan (PRD §4.20).
 
 ### P13.4 — Aturan alert
 
-- [ ] File rules Prometheus `SentinelWorkerDown` (`> 60` dtk, `for: 1m`) dan `SentinelHighJobLag` (`> 30`, `for: 2m`); daftarkan di `prometheus.yml`.
+- [x] File rules Prometheus `SentinelWorkerDown` (`> 60` dtk, `for: 1m`) dan `SentinelHighJobLag` (`> 30`, `for: 2m`); daftarkan di `prometheus.yml`.
 
 ### P13.5 — Verifikasi di dev
 
-- [ ] Waterfall trace tampil di Jaeger (`:16686`); metrik tampil di Prometheus (`:9090`); matikan worker → alert menyala.
+- [x] Waterfall trace tampil di Jaeger (`:16686`); metrik tampil di Prometheus (`:9090`); matikan worker → alert menyala.
 
 ---
 
@@ -920,17 +923,17 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P14.1 — Konfigurasi Nuxt & Tailwind v4
 
-- [ ] `nuxt.config.ts` ARCH §8.1: `compatibilityVersion: 4`, modul `@nuxt/ui`, `routeRules` (`/login` SSR, `/dashboard/**` SPA, `/api/**` tanpa CORS), Nitro `node-server` + WebSocket, `build.transpile` paket `@sentinel/*`.
-- [ ] Pasang peer chart sesuai Nuxt UI v4.12 (D-05); fallback `@unovis/vue` hanya untuk korelasi lanjutan.
-- [ ] `main.css`: `@theme` semua token DES §3 (dark default + light cream), font Geist Mono → JetBrains Mono → IBM Plex Mono.
+- [x] `nuxt.config.ts` ARCH §8.1: `compatibilityVersion: 4`, modul `@nuxt/ui`, `routeRules` (`/login` SSR, `/dashboard/**` SPA, `/api/**` tanpa CORS), Nitro `node-server` + WebSocket, `build.transpile` paket `@sentinel/*`.
+- [x] Pasang peer chart sesuai Nuxt UI v4.12 (D-05); fallback `@unovis/vue` hanya untuk korelasi lanjutan.
+- [x] `main.css`: `@theme` semua token DES §3 (dark default + light cream), font Geist Mono → JetBrains Mono → IBM Plex Mono.
 
 ### P14.2 — Override komponen Nuxt UI
 
-- [ ] `app.config.ts` (D-22): tombol/input/badge/tabel/kartu bergaya terminal (font mono, `rounded-xs`, tanpa shadow, hairline 1px) memakai token semantik, bukan warna hardcode.
+- [x] `app.config.ts` (D-22): tombol/input/badge/tabel/kartu bergaya terminal (font mono, `rounded-xs`, tanpa shadow, hairline 1px) memakai token semantik, bukan warna hardcode.
 
 ### P14.3 — `app.vue`, tema, mode warna
 
-- [ ] Bungkus `UApp`; Nuxt ColorMode dengan default dark dan opsi light; tombol `[THEME]`.
+- [x] Bungkus `UApp`; Nuxt ColorMode dengan default dark dan opsi light; tombol `[THEME]`.
 
 ### P14.4 — TanStack Query & klien API
 

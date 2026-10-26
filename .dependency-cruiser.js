@@ -72,6 +72,9 @@ const config = {
     doNotFollow: {
       path: "node_modules",
     },
+    exclude: {
+      path: "(?:^|/)(\\.output|\\.nuxt|dist|coverage)/",
+    },
     tsPreCompilationDeps: true,
     tsConfig: {
       fileName: "tsconfig.json",
