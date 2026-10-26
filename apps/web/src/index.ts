@@ -8,3 +8,5 @@ export const WEB_METADATA = {
   applicationVersion: APPLICATION_VERSION,
   infraVersion: INFRA_VERSION,
 };
+
+export * from "../app/composables/index.js";
