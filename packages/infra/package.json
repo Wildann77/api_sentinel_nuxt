@@ -10,14 +10,17 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "bun run ./src/db/migrate.ts",
-    "owner:create": "bun run ./src/cli/owner-create.ts",
-    "secrets:reencrypt": "bun run ./src/crypto/secrets-reencrypt.ts"
+    "db:migrate": "bun run --env-file=../../.env ./src/db/migrate.ts",
+    "db:seed": "bun run --env-file=../../.env ./src/cli/seed.ts",
+    "owner:create": "bun run --env-file=../../.env ./src/cli/owner-create.ts",
+    "secrets:reencrypt": "bun run --env-file=../../.env ./src/crypto/secrets-reencrypt.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",
     "@opentelemetry/api": "1.10.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.300.0",
+    "@opentelemetry/otlp-exporter-base": "0.300.0",
+    "@opentelemetry/otlp-transformer": "0.300.0",
     "@opentelemetry/resources": "3.0.0",
     "@opentelemetry/sdk-node": "0.300.0",
     "@opentelemetry/semantic-conventions": "1.43.0",
