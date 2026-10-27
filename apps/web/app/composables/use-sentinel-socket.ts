@@ -27,7 +27,9 @@ export interface UseSentinelSocketReturn {
   socket: Ref<WebSocket | null>;
 }
 
-export function useSentinelSocket(options: UseSentinelSocketOptions = {}): UseSentinelSocketReturn {
+export function createSentinelSocketClient(
+  options: UseSentinelSocketOptions = {},
+): UseSentinelSocketReturn {
   const status = ref<SocketStatus>("DISCONNECTED");
   const flashingMonitors = ref<Set<string>>(new Set<string>());
   const socketRef = ref<WebSocket | null>(null);
@@ -171,6 +173,7 @@ export function useSentinelSocket(options: UseSentinelSocketOptions = {}): UseSe
           });
         });
         void resolvedQueryClient.invalidateQueries({ queryKey: ["checks", msg.monitorId] });
+        void resolvedQueryClient.invalidateQueries({ queryKey: ["checks"] });
         void resolvedQueryClient.invalidateQueries({ queryKey: ["metrics"] });
       }
     } else if (msg.event === "INCIDENT_TRANSITION") {
@@ -328,17 +331,6 @@ export function useSentinelSocket(options: UseSentinelSocketOptions = {}): UseSe
     }
   }
 
-  if (getCurrentInstance()) {
-    onMounted(() => {
-      if (options.autoConnect !== false) {
-        connect();
-      }
-    });
-    onUnmounted(() => {
-      disconnect();
-    });
-  }
-
   return {
     status,
     isFlashing,
@@ -350,4 +342,46 @@ export function useSentinelSocket(options: UseSentinelSocketOptions = {}): UseSe
     reconnect,
     socket: socketRef,
   };
+}
+
+let sharedClientInstance: UseSentinelSocketReturn | null = null;
+
+export function resetSentinelSocketSingleton(): void {
+  if (sharedClientInstance) {
+    sharedClientInstance.disconnect();
+    sharedClientInstance = null;
+  }
+}
+
+export function useSentinelSocket(options: UseSentinelSocketOptions = {}): UseSentinelSocketReturn {
+  // If isolated options provided (like custom WebSocketClass in vitest), create standalone instance
+  if (options.WebSocketClass || options.url) {
+    const client = createSentinelSocketClient(options);
+    if (getCurrentInstance()) {
+      onMounted(() => {
+        if (options.autoConnect !== false) {
+          client.connect();
+        }
+      });
+      onUnmounted(() => {
+        client.disconnect();
+      });
+    }
+    return client;
+  }
+
+  // Browser client runtime: shared singleton instance
+  if (!sharedClientInstance) {
+    sharedClientInstance = createSentinelSocketClient(options);
+  }
+
+  if (getCurrentInstance()) {
+    onMounted(() => {
+      if (options.autoConnect !== false && sharedClientInstance?.status.value === "DISCONNECTED") {
+        sharedClientInstance.connect();
+      }
+    });
+  }
+
+  return sharedClientInstance;
 }
