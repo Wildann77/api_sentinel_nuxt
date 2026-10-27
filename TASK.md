@@ -937,19 +937,19 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P14.4 — TanStack Query & klien API
 
-- [ ] Plugin `app/plugins/vue-query.ts` (ARCH §8.2: `staleTime 10s`, `refetchOnWindowFocus`, `retry 1`).
-- [ ] Wrapper `$fetch` yang mengurai RFC 9457 menjadi error terstruktur; semua tipe dari `@sentinel/contracts`.
-- [ ] Composable query/mutation per resource (monitors, checks, incidents, metrics, settings).
+- [x] Plugin `app/plugins/vue-query.ts` (ARCH §8.2: `staleTime 10s`, `refetchOnWindowFocus`, `retry 1`).
+- [x] Wrapper `$fetch` yang mengurai RFC 9457 menjadi error terstruktur; semua tipe dari `@sentinel/contracts`.
+- [x] Composable query/mutation per resource (monitors, checks, incidents, metrics, settings).
 
 ### P14.5 — Komponen bersama
 
-- [ ] `StatusBadge` (5 status, `aria-label` jelas), `MetricTile`, `BracketButton`, `WsIndicator`, `ProblemAlert`, `EmptyState` (border dashed), `DestructiveConfirmModal` (ketik nama monitor), `SkeletonRows/Tiles`, `UtcTime/RelativeTime`, `CopyButton`, `Sparkline` (SVG), `LatencyChart` (`<UChart>`), `JsonViewer` (highlight), `HttpMethodBadge`.
+- [x] `StatusBadge` (5 status, `aria-label` jelas), `MetricTile`, `BracketButton`, `WsIndicator`, `ProblemAlert`, `EmptyState` (border dashed), `DestructiveConfirmModal` (ketik nama monitor), `SkeletonRows/Tiles`, `UtcTime/RelativeTime`, `CopyButton`, `Sparkline` (SVG), `LatencyChart` (`<UChart>`), `JsonViewer` (highlight), `HttpMethodBadge`.
 
 ### P14.6 — Layout & navigasi
 
-- [ ] Topbar 48 px: `[SENTINEL_]` dengan kursor berkedip, tab `[01: OVERVIEW]…[04: SETTINGS]`, `WsIndicator`, `[Ctrl+K]`, `[THEME]`, `[LOGOUT]`; breadcrumb.
-- [ ] `UCommandPalette` (Ctrl+K) untuk navigasi cepat.
-- [ ] Middleware rute: redirect ke `/login` bila tidak ada sesi; layout `login` terpisah.
+- [x] Topbar 48 px: `[SENTINEL_]` dengan kursor berkedip, tab `[01: OVERVIEW]…[04: SETTINGS]`, `WsIndicator`, `[Ctrl+K]`, `[THEME]`, `[LOGOUT]`; breadcrumb.
+- [x] `UCommandPalette` (Ctrl+K) untuk navigasi cepat.
+- [x] Middleware rute: redirect ke `/login` bila tidak ada sesi; layout `login` terpisah.
 
 **Ref:** DES §2, §3, §4, §6; ARCH §8.
 
@@ -959,57 +959,57 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P15.1 — `/login`
 
-- [ ] Kartu 380 px, `[SENTINEL::AUTH_GATE]`, field username & password (toggle visibilitas), `[ENTER SYSTEM]` (disabled saat submitting), `ProblemAlert` untuk error.
+- [x] Kartu 380 px, `[SENTINEL::AUTH_GATE]`, field username & password (toggle visibilitas), `[ENTER SYSTEM]` (disabled saat submitting), `ProblemAlert` untuk error.
 
 **Ref:** DES §5.1, US 1.
 
 ### P15.2 — `/dashboard` (Overview)
 
-- [ ] 4 `MetricTile`: uptime 24h/7d, rata-rata latency, insiden aktif, total monitor (menampilkan N/A, bukan 0/100%).
-- [ ] Grafik latency komposit (`<UChart>`) dengan tombol `[24H] [7D] [30D]`.
-- [ ] Feed 10 pemeriksaan terakhir real-time via WS.
+- [x] 4 `MetricTile`: uptime 24h/7d, rata-rata latency, insiden aktif, total monitor (menampilkan N/A, bukan 0/100%).
+- [x] Grafik latency komposit (`<UChart>`) dengan tombol `[24H] [7D] [30D]`.
+- [x] Feed 10 pemeriksaan terakhir real-time via WS.
 
 **Ref:** DES §5.2, PRD §4.16.
 
 ### P15.3 — `/dashboard/monitors`
 
-- [ ] Filter pencarian + dropdown status; `[+ TAMBAH MONITOR BARU]`.
-- [ ] `UTable` 7 kolom (status, metode, nama+URL+salin, sparkline, uptime/latency, waktu cek terakhir, aksi).
-- [ ] Menu aksi: `[RUN PROBE NOW]`, `[PAUSE / RESUME]` (konfirmasi bila insiden terbuka: tetap unresolved), `[EDIT CONFIGURATION]`, `[DELETE MONITOR]`.
+- [x] Filter pencarian + dropdown status; `[+ TAMBAH MONITOR BARU]`.
+- [x] `UTable` 7 kolom (status, metode, nama+URL+salin, sparkline, uptime/latency, waktu cek terakhir, aksi).
+- [x] Menu aksi: `[RUN PROBE NOW]`, `[PAUSE / RESUME]` (konfirmasi bila insiden terbuka: tetap unresolved), `[EDIT CONFIGURATION]`, `[DELETE MONITOR]`.
 
 **Ref:** DES §5.3, US 13, 14.
 
 ### P15.4 — Form monitor (`/new` & `[id]/edit`)
 
-- [ ] `UTabs`: `[01: TARGET & SCHEDULE]`, `[02: HEADERS & AUTHENTICATION]`, `[03: RESPONSE ASSERTIONS]`.
-- [ ] Tab 01: nama, metode, URL, interval (1m…24h), timeout.
-- [ ] Tab 02: tipe auth, rahasia ter-mask + label Zero-Leak, builder header key-value, body JSON (POST/PUT/PATCH).
-- [ ] Tab 03: status diharapkan (sesuai D-15), assertion header, builder JSONPath + operator + nilai; validasi inline maks 10 aturan.
-- [ ] Footer lengket: `[> RUN TEST PROBE SEKARANG]` (modal hasil), `[BATAL]`, `[SIMPAN & AKTIFKAN MONITOR]`; validasi Zod; `version` OCC; tangani 409 (minta muat ulang).
+- [x] `UTabs`: `[01: TARGET & SCHEDULE]`, `[02: HEADERS & AUTHENTICATION]`, `[03: RESPONSE ASSERTIONS]`.
+- [x] Tab 01: nama, metode, URL, interval (1m…24h), timeout.
+- [x] Tab 02: tipe auth, rahasia ter-mask + label Zero-Leak, builder header key-value, body JSON (POST/PUT/PATCH).
+- [x] Tab 03: status diharapkan (sesuai D-15), assertion header, builder JSONPath + operator + nilai; validasi inline maks 10 aturan.
+- [x] Footer lengket: `[> RUN TEST PROBE SEKARANG]` (modal hasil), `[BATAL]`, `[SIMPAN & AKTIFKAN MONITOR]`; validasi Zod; `version` OCC; tangani 409 (minta muat ulang).
 
 **Ref:** DES §5.4, US 4–11.
 
 ### P15.5 — `/dashboard/monitors/[id]`
 
-- [ ] Banner (nama, URL, status, `[PAUSE] [EDIT] [TRIGGER MANUAL CHECK]`).
-- [ ] 3 kartu agregasi (24h, 7d, 30d: uptime + avg/P95/P99).
-- [ ] `<UChart>` hijau untuk sukses, titik merah untuk gagal, tooltip monospaced.
-- [ ] `UTable` riwayat + `[INSPECT]` → `USlideover` 480 px: kategori kegagalan, IP pinning, request/response headers (tersanitasi), cuplikan body ≤ 5 KB, checklist `[PASS]/[FAIL]` dengan alasan.
+- [x] Banner (nama, URL, status, `[PAUSE] [EDIT] [TRIGGER MANUAL CHECK]`).
+- [x] 3 kartu agregasi (24h, 7d, 30d: uptime + avg/P95/P99).
+- [x] `<UChart>` hijau untuk sukses, titik merah untuk gagal, tooltip monospaced.
+- [x] `UTable` riwayat + `[INSPECT]` → `USlideover` 480 px: kategori kegagalan, IP pinning, request/response headers (tersanitasi), cuplikan body ≤ 5 KB, checklist `[PASS]/[FAIL]` dengan alasan.
 
 **Ref:** DES §5.5, US 16–20.
 
 ### P15.6 — `/dashboard/incidents`
 
-- [ ] Banner insiden aktif: border rose 2 px, stopwatch `DOWNTIME: hh:mm:ss`, penghitung kegagalan beruntun.
-- [ ] Tabel arsip: ID, monitor, mulai, pulih, durasi, penyebab, status notifikasi; badge `OPEN/RECOVERING/RESOLVED`.
+- [x] Banner insiden aktif: border rose 2 px, stopwatch `DOWNTIME: hh:mm:ss`, penghitung kegagalan beruntun.
+- [x] Tabel arsip: ID, monitor, mulai, pulih, durasi, penyebab, status notifikasi; badge `OPEN/RECOVERING/RESOLVED`.
 
 **Ref:** DES §5.6, US 21–25.
 
 ### P15.7 — `/dashboard/settings`
 
-- [ ] Telegram: token ter-mask, chat ID, `[TEST PING BOT]` + toast, keterangan kebijakan zero-spam.
-- [ ] Ubah password pemilik (verifikasi password lama).
-- [ ] Ekspor: `[DOWNLOAD CSV RIWAYAT PEMERIKSAAN]` & `[DOWNLOAD CSV RIWAYAT INSIDEN]` (dengan filter monitor/rentang waktu).
+- [x] Telegram: token ter-mask, chat ID, `[TEST PING BOT]` + toast, keterangan kebijakan zero-spam.
+- [x] Ubah password pemilik (verifikasi password lama).
+- [x] Ekspor: `[DOWNLOAD CSV RIWAYAT PEMERIKSAAN]` & `[DOWNLOAD CSV RIWAYAT INSIDEN]` (dengan filter monitor/rentang waktu).
 
 **Ref:** DES §5.7, US 26–30.
 
