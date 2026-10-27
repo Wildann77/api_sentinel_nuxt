@@ -12,6 +12,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "bun --filter '*' dev",
     "dev:web": "bun --filter @sentinel/web dev",
     "dev:worker": "bun --filter @sentinel/worker dev",
     "build": "bun --filter '*' build",
@@ -26,11 +27,13 @@
     "test:e2e": "playwright test",
     "db:generate": "bun --filter @sentinel/infra db:generate",
     "db:migrate": "bun --filter @sentinel/infra db:migrate",
+    "db:seed": "bun --filter @sentinel/infra db:seed",
     "owner:create": "bun --filter @sentinel/infra owner:create",
     "secrets:reencrypt": "bun --filter @sentinel/infra secrets:reencrypt"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.2",
+    "@opentelemetry/otlp-exporter-base": "0.300.0",
     "@testcontainers/postgresql": "^10.19.0",
     "@types/node": "^24.11.1",
     "@vitest/coverage-v8": "^3.2.0",
