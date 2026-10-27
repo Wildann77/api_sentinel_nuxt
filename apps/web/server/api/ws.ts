@@ -99,9 +99,16 @@ export const wsHooks = {
       return new Response("Unauthorized: session expired or invalid", { status: 401 });
     }
 
-    request.context = request.context || {};
-    request.context.user = validation.user;
-    request.context.sessionToken = token;
+    const ctx = (request.context as Record<string, unknown> | undefined) ?? {};
+    if (!request.context) {
+      try {
+        request.context = ctx;
+      } catch {
+        // NodeReqProxy.context is non-writable in crossws
+      }
+    }
+    ctx.user = validation.user;
+    ctx.sessionToken = token;
   },
 
   open(peer: Peer) {
