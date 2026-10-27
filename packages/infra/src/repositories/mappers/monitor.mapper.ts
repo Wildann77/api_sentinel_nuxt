@@ -29,6 +29,12 @@ export const MonitorMapper = {
       encryptedAuthConfig: row.encryptedAuthConfig
         ? new EncryptedSecret(row.encryptedAuthConfig)
         : null,
+      authType: (row.authType ?? "NONE") as
+        | "NONE"
+        | "BEARER"
+        | "BASIC"
+        | "API_KEY"
+        | "CUSTOM_HEADER",
       assertionRules,
       intervalSeconds: row.intervalSeconds,
       timeoutMs: row.timeoutMs,
@@ -55,6 +61,7 @@ export const MonitorMapper = {
       encryptedAuthConfig: monitor.encryptedAuthConfig
         ? monitor.encryptedAuthConfig.toString()
         : null,
+      authType: monitor.authType,
       assertionRules: monitor.assertionRules.map((r) => ({
         type: r.type,
         operator: r.operator,

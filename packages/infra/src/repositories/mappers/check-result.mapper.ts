@@ -42,7 +42,7 @@ export const CheckResultMapper = {
       startedAt: checkResult.startedAt,
       finishedAt: checkResult.finishedAt,
       executedAt: checkResult.startedAt,
-      durationMs: checkResult.durationMs ?? 0,
+      durationMs: checkResult.durationMs != null ? Math.round(checkResult.durationMs) : 0,
       isSuccess: checkResult.isSuccess,
       statusCode: checkResult.statusCode,
       failureCategory: checkResult.failureCategory,

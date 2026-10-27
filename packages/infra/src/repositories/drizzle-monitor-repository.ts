@@ -4,7 +4,7 @@ import type {
   PaginatedMonitors,
 } from "@sentinel/application";
 import { ConflictException, type Monitor, type UUIDv7 } from "@sentinel/domain";
-import { and, asc, desc, eq, ilike, lt, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, lt, lte, or } from "drizzle-orm";
 import type { DrizzleDatabase } from "../db/connection.js";
 import { monitors } from "../db/schema/index.js";
 import { MonitorMapper } from "./mappers/monitor.mapper.js";
@@ -142,8 +142,8 @@ export class DrizzleMonitorRepository implements MonitorRepositoryPort {
     const insertValues = MonitorMapper.toInsert(monitor);
     const id = monitor.id.toString();
 
-    // OCC: check version in DB. Target version is monitor.version, or version + 1
-    const targetVersion = monitor.version > 1 ? monitor.version : sql`${monitors.version} + 1`;
+    // OCC: target version matches monitor.version
+    const targetVersion = monitor.version;
 
     const updated = await targetDb
       .update(monitors)
