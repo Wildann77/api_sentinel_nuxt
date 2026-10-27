@@ -281,10 +281,10 @@ export function buildWorkerContainer(
 
       await boss.start();
 
+      await boss.createQueue("dlq", { policy: "standard" });
+      await boss.createQueue("maintenance", { policy: "standard" });
       await boss.createQueue("probe:check", { policy: "stately", deadLetter: "dlq" });
       await boss.createQueue("notification:send", { policy: "stately", deadLetter: "dlq" });
-      await boss.createQueue("maintenance", { policy: "standard" });
-      await boss.createQueue("dlq", { policy: "standard" });
 
       await probeCheckJobHandler.register();
       await notificationJobHandler.register();
