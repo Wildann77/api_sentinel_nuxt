@@ -21,7 +21,7 @@ export function createPgPool(config: PgPoolConfig = {}): pg.Pool {
   const connectionString =
     config.connectionString ??
     process.env.DATABASE_URL ??
-    "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel";
+    "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
   return new Pool({
     connectionString,
@@ -41,7 +41,7 @@ export function createListenClient(config: PgPoolConfig = {}): pg.Client {
   const connectionString =
     config.connectionString ??
     process.env.DATABASE_URL ??
-    "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel";
+    "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
   return new Client({
     connectionString,
