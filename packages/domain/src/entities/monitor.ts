@@ -186,7 +186,6 @@ export class Monitor implements BaseEntity<UUIDv7> {
     this.consecutiveFailures += 1;
     this.consecutiveSuccesses = 0;
     this.lastCheckedAt = result.finishedAt;
-    this.version += 1;
 
     if (this.healthStatus !== "DOWN") {
       if (this.consecutiveFailures < 3) {
@@ -229,7 +228,6 @@ export class Monitor implements BaseEntity<UUIDv7> {
     this.consecutiveSuccesses += 1;
     this.consecutiveFailures = 0;
     this.lastCheckedAt = result.finishedAt;
-    this.version += 1;
 
     if (this.healthStatus === "DOWN") {
       if (this.consecutiveSuccesses < 2) {
