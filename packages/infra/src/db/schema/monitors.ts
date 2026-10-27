@@ -24,6 +24,7 @@ export const monitors = pgTable(
     headerKeys: jsonb("header_keys").notNull().default(sql`'[]'::jsonb`).$type<string[]>(),
     encryptedBody: text("encrypted_body"),
     encryptedAuthConfig: text("encrypted_auth_config"),
+    authType: varchar("auth_type", { length: 32 }).notNull().default("NONE"),
     assertionRules: jsonb("assertion_rules").notNull().default(sql`'[]'::jsonb`).$type<unknown[]>(),
     intervalSeconds: integer("interval_seconds").notNull().default(300),
     timeoutMs: integer("timeout_ms").notNull().default(10000),
