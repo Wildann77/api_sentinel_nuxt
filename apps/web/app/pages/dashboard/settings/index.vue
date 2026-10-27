@@ -197,17 +197,26 @@ const selectedExportRange = ref<string>("24H");
 const customFrom = ref<string>("");
 const customTo = ref<string>("");
 
+function extractSelectValue(val: unknown): string {
+  if (!val) return "ALL";
+  if (typeof val === "object" && val !== null && "value" in val) {
+    return String((val as { value: unknown }).value || "ALL");
+  }
+  return String(val);
+}
+
 function resolveExportRange(): { from: string; to: string } {
   const end = new Date();
-  if (selectedExportRange.value === "24H") {
+  const range = extractSelectValue(selectedExportRange.value);
+  if (range === "24H") {
     const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
     return { from: start.toISOString(), to: end.toISOString() };
   }
-  if (selectedExportRange.value === "7D") {
+  if (range === "7D") {
     const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
     return { from: start.toISOString(), to: end.toISOString() };
   }
-  if (selectedExportRange.value === "30D") {
+  if (range === "30D") {
     const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
     return { from: start.toISOString(), to: end.toISOString() };
   }
@@ -225,8 +234,9 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
     from,
     to,
   });
-  if (selectedExportMonitor.value && selectedExportMonitor.value !== "ALL") {
-    params.set("monitorId", selectedExportMonitor.value);
+  const monitorId = extractSelectValue(selectedExportMonitor.value);
+  if (monitorId && monitorId !== "ALL") {
+    params.set("monitorId", monitorId);
   }
 
   const downloadUrl = `/api/reports/export.csv?${params.toString()}`;
@@ -507,6 +517,8 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
           <USelect
             v-model="selectedExportMonitor"
             :items="exportMonitorOptions"
+            value-key="value"
+            label-key="label"
             class="w-full font-mono text-xs"
             :ui="{
               base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none',
@@ -522,6 +534,8 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
           <USelect
             v-model="selectedExportRange"
             :items="exportPresetOptions"
+            value-key="value"
+            label-key="label"
             class="w-full font-mono text-xs"
             :ui="{
               base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none',
@@ -530,7 +544,7 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
         </div>
 
         <!-- Custom From (if custom range selected) -->
-        <div v-if="selectedExportRange === 'CUSTOM'" class="space-y-1.5">
+        <div v-if="extractSelectValue(selectedExportRange) === 'CUSTOM'" class="space-y-1.5">
           <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider">
             DARI (TANGGAL MULAI)
           </label>
