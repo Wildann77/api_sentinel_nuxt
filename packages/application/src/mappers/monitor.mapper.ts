@@ -7,6 +7,21 @@ export interface MonitorMapperOptions {
   readonly updatedAt?: Date | string;
 }
 
+function toAssertionExpected(expected: unknown): string | number | boolean | number[] | undefined {
+  if (expected === undefined || expected === null) return undefined;
+  if (
+    typeof expected === "string" ||
+    typeof expected === "number" ||
+    typeof expected === "boolean"
+  ) {
+    return expected;
+  }
+  if (Array.isArray(expected)) {
+    return expected.map((v) => Number(v));
+  }
+  return String(expected);
+}
+
 export function toMonitorResponseDto(
   monitor: Monitor,
   options: MonitorMapperOptions = {},
@@ -34,6 +49,13 @@ export function toMonitorResponseDto(
     lastCheckedAt: monitor.lastCheckedAt ? monitor.lastCheckedAt.toISOString() : null,
     nextRunAt: monitor.nextRunAt.toISOString(),
     sparkline: options.sparkline ? [...options.sparkline] : [],
+    assertions: monitor.assertionRules.map((r) => ({
+      type: r.type,
+      operator: r.operator,
+      target: r.target,
+      expected: toAssertionExpected(r.expected),
+    })),
+    hasCustomBody: monitor.encryptedBody !== null,
     createdAt: createdAtIso,
     updatedAt: updatedAtIso,
   };
