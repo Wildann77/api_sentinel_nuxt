@@ -693,7 +693,7 @@ describe("P8.3, P8.4, P8.5 — Monitor Endpoints & Slice Suite", () => {
           checkId: response.checkId,
           triggerType: "MANUAL",
         }),
-        { priority: 10 },
+        expect.objectContaining({ priority: 10 }),
       );
     });
 

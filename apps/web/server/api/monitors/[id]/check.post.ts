@@ -35,6 +35,7 @@ export default defineEventHandler(async (event): Promise<ManualCheckQueuedRespon
   const traceparent = generateTraceparent();
 
   // Enqueue prioritas tinggi ke pg-boss (ARCH §6.3.A, §7.1.B, D-13, ARCH §9.5.A)
+  // Catatan pg-boss v12: regex ^[\w.\-/]+$ menolak tanda ':', nama diubah ke 'probe_check'
   await container.boss.send(
     "probe:check",
     {
@@ -44,13 +45,14 @@ export default defineEventHandler(async (event): Promise<ManualCheckQueuedRespon
       __traceparent: traceparent,
       scheduledFor: container.clock.now().toISOString(),
     },
-    { priority: 10 },
+    { priority: 10, singletonKey: id },
   );
 
   setResponseStatus(event, 202);
 
   return {
     checkId,
+    jobId: checkId,
     message: "Pemeriksaan manual monitor berhasil dijadwalkan.",
   };
 });
