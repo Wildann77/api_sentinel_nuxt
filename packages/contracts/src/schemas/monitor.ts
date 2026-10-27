@@ -195,6 +195,8 @@ export const MonitorResponseSchema = z.object({
   lastCheckedAt: z.string().nullable(),
   nextRunAt: z.string().nullable(),
   sparkline: z.array(SparklinePointSchema).default([]),
+  assertions: z.array(AssertionRuleInputSchema).optional(),
+  hasCustomBody: z.boolean().default(false),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
