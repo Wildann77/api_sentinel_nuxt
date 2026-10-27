@@ -1,4 +1,4 @@
-import { DomainException, RateLimitExceededException, ValidationException } from "@sentinel/domain";
+import { DomainException } from "@sentinel/domain";
 
 export interface ProblemDetailsPayload {
   readonly type: string;
@@ -31,18 +31,49 @@ export function createProblemDetails(
   let invalidParams: readonly { name: string; reason: string }[] | undefined;
   let retryAfterSeconds: number | undefined;
 
-  if (error instanceof DomainException) {
-    statusCode = error.statusCode;
-    errorType = error.errorType;
-    title = error.title;
-    detail = error.message;
+  // Unwrap nested cause (e.g. from H3Error / Nitro error hook wrapper)
+  let actualError: unknown = error;
+  while (
+    actualError &&
+    typeof actualError === "object" &&
+    "cause" in actualError &&
+    (actualError as { cause?: unknown }).cause
+  ) {
+    actualError = (actualError as { cause?: unknown }).cause;
+  }
 
-    if (error instanceof ValidationException && error.invalidParams.length > 0) {
-      invalidParams = error.invalidParams;
+  const isDomain =
+    actualError instanceof DomainException ||
+    (typeof actualError === "object" &&
+      actualError !== null &&
+      "statusCode" in actualError &&
+      typeof (actualError as { statusCode?: unknown }).statusCode === "number" &&
+      "errorType" in actualError &&
+      typeof (actualError as { errorType?: unknown }).errorType === "string");
+
+  if (isDomain) {
+    const domainErr = actualError as DomainException;
+    statusCode = domainErr.statusCode;
+    errorType = domainErr.errorType;
+    title = domainErr.title || title;
+    detail = domainErr.message || detail;
+
+    if (
+      "invalidParams" in domainErr &&
+      Array.isArray((domainErr as unknown as { invalidParams: unknown }).invalidParams)
+    ) {
+      invalidParams = (
+        domainErr as unknown as {
+          invalidParams: readonly { name: string; reason: string }[];
+        }
+      ).invalidParams;
     }
 
-    if (error instanceof RateLimitExceededException) {
-      retryAfterSeconds = error.retryAfterSeconds;
+    if (
+      "retryAfterSeconds" in domainErr &&
+      typeof (domainErr as unknown as { retryAfterSeconds: unknown }).retryAfterSeconds === "number"
+    ) {
+      retryAfterSeconds = (domainErr as unknown as { retryAfterSeconds: number }).retryAfterSeconds;
     }
   }
 
