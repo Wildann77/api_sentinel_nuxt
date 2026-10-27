@@ -58,4 +58,9 @@ export default defineNuxtConfig({
       "@sentinel/contracts",
     ],
   },
+  vite: {
+    optimizeDeps: {
+      include: ["@tanstack/vue-query", "zod"],
+    },
+  },
 });
