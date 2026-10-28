@@ -17,7 +17,7 @@ const isDark = computed({
   <ClientOnly>
     <button
       type="button"
-      class="font-mono text-xs text-text-secondary hover:text-text-primary px-2.5 py-1 rounded-xs border border-hairline hover:border-hairline-strong bg-surface hover:bg-surface-hover transition-colors cursor-pointer select-none inline-flex items-center gap-1.5"
+      class="font-mono text-xs text-text-secondary hover:text-text-primary px-2.5 py-1 rounded-xs border border-hairline hover:border-hairline-strong bg-surface hover:bg-surface-hover transition-colors cursor-pointer select-none inline-flex items-center gap-1.5 min-h-[36px] focus-visible:outline focus-visible:outline-1 focus-visible:outline-text-muted focus-visible:outline-offset-2"
       :aria-label="`Switch to ${isDark ? 'light' : 'dark'} mode`"
       @click="isDark = !isDark"
     >
@@ -28,7 +28,7 @@ const isDark = computed({
       <span class="text-text-muted">]</span>
     </button>
     <template #fallback>
-      <span class="font-mono text-xs text-text-muted px-2.5 py-1 border border-hairline rounded-xs bg-surface inline-flex items-center">
+      <span class="font-mono text-xs text-text-muted px-2.5 py-1 border border-hairline rounded-xs bg-surface inline-flex items-center min-h-[36px]">
         [THEME]
       </span>
     </template>

@@ -32,17 +32,39 @@ const config = computed(() => {
     default:
       return {
         text: "✕ DISCONNECTED",
-        ariaLabel: "WebSocket connection: Disconnected from live telemetry stream",
-        colorClass: "text-ws-disconnected border-ws-disconnected/30 bg-ws-disconnected/10",
+        ariaLabel:
+          "WebSocket connection: Disconnected from live telemetry stream. Click to reconnect.",
+        colorClass:
+          "text-ws-disconnected border-ws-disconnected/30 bg-ws-disconnected/10 hover:bg-ws-disconnected/20 cursor-pointer",
         dotClass: "bg-ws-disconnected",
       };
   }
 });
+
+function handleAction(): void {
+  if (currentStatus.value !== "LIVE") {
+    socket.reconnect();
+  }
+}
 </script>
 
 <template>
+  <button
+    v-if="currentStatus !== 'LIVE'"
+    type="button"
+    class="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs font-semibold rounded-xs border select-none transition-colors cursor-pointer min-h-[36px] focus-visible:outline focus-visible:outline-1 focus-visible:outline-text-muted focus-visible:outline-offset-2"
+    :class="config.colorClass"
+    role="status"
+    :aria-label="config.ariaLabel"
+    @click="handleAction"
+  >
+    <span class="text-text-muted">[</span>
+    <span>{{ config.text }}</span>
+    <span class="text-text-muted">]</span>
+  </button>
   <span
-    class="inline-flex items-center gap-1.5 px-2 py-0.5 font-mono text-xs font-semibold rounded-xs border select-none transition-colors"
+    v-else
+    class="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs font-semibold rounded-xs border select-none transition-colors min-h-[36px]"
     :class="config.colorClass"
     role="status"
     :aria-label="config.ariaLabel"
