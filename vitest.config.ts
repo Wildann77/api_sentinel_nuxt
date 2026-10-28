@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
+process.loadEnvFile?.('.env');
+
 export default defineConfig({
   test: {
     globals: true,
@@ -8,6 +10,16 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: [
+        'packages/domain/src/**/*.ts',
+        'packages/application/src/**/*.ts',
+        'packages/infra/src/**/*.ts',
+      ],
+      exclude: [
+        'packages/application/src/test-doubles/**',
+        'packages/infra/src/cli/**',
+        '**/*.d.ts',
+      ],
       thresholds: {
         'packages/domain/**': {
           lines: 90,

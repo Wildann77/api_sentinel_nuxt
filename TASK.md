@@ -1019,27 +1019,27 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P16.1 — Kelengkapan 6 state
 
-- [ ] Untuk SETIAP halaman/komponen data: Loading (skeleton), Empty (dashed + CTA), Live/Success (`[● LIVE]`, kedip 500 ms), Stale/Offline (`(STALE DATA)` + `[RECONNECT]`), Error RFC 9457 (`ProblemAlert` + `[COBA LAGI]`), Destructive Confirm (ketik nama).
+- [x] Untuk SETIAP halaman/komponen data: Loading (skeleton), Empty (dashed + CTA), Live/Success (`[● LIVE]`, kedip 500 ms), Stale/Offline (`(STALE DATA)` + `[RECONNECT]`), Error RFC 9457 (`ProblemAlert` + `[COBA LAGI]`), Destructive Confirm (ketik nama).
 
 **Ref:** DES §7.
 
 ### P16.2 — Aksesibilitas WCAG 2.2 AA
 
-- [ ] Kontras sesuai tabel DES §8 (verifikasi dark & light).
-- [ ] Operasi keyboard penuh (tab bar dengan panah, fokus `outline 1px #a1a1aa`, tanpa jebakan, fokus kembali saat modal/drawer ditutup).
-- [ ] `aria-label` badge, `aria-live="polite"` untuk transisi insiden; target sentuh ≥ 36 px (44×44 px pada mobile).
+- [x] Kontras sesuai tabel DES §8 (verifikasi dark & light).
+- [x] Operasi keyboard penuh (tab bar dengan panah, fokus `outline 1px #a1a1aa`, tanpa jebakan, fokus kembali saat modal/drawer ditutup).
+- [x] `aria-label` badge, `aria-live="polite"` untuk transisi insiden; target sentuh ≥ 36 px (44×44 px pada mobile).
 
 **Ref:** DES §8.
 
 ### P16.3 — Responsif
 
-- [ ] `>1440` (container 1440), `1024–1439`, `768–1023` (grid 2×2, sembunyikan sparkline), `<768` (menu dropdown, tabel → card list, drawer `100vw`).
+- [x] `>1440` (container 1440), `1024–1439`, `768–1023` (grid 2×2, sembunyikan sparkline), `<768` (menu dropdown, tabel → card list, drawer `100vw`).
 
 **Ref:** DES §9.
 
 ### P16.4 — Checklist verifikasi frontend
 
-- [ ] Jalankan seluruh daftar DES §10: stack, zero hardcoded colors, zero-leak UI, kontrak `@sentinel/contracts`, WebSocket fallback, aksesibilitas, E2E.
+- [x] Jalankan seluruh daftar DES §10: stack, zero hardcoded colors, zero-leak UI, kontrak `@sentinel/contracts`, WebSocket fallback, aksesibilitas, E2E.
 
 ---
 
@@ -1047,39 +1047,39 @@ Kolom "Rekomendasi" adalah usulan; ubah jika Anda memilih lain, lalu tandai `[x]
 
 ### P17.1 — Unit (domain & application ≥ 90%)
 
-- [ ] AssertionEngine, state machine monitor, insiden 3×/2×, reset penghitung, uptime/latency, sanitasi CSV, redaksi logger, kredensial dalam diagnostik.
+- [x] AssertionEngine, state machine monitor, insiden 3×/2×, reset penghitung, uptime/latency, sanitasi CSV, redaksi logger, kredensial dalam diagnostik.
 
 **Ref:** PRD §5.1, ARCH §13.
 
 ### P17.2 — Keamanan
 
-- [ ] SSRF 100% (P6.7), tidak ada kebocoran rahasia (respons/log/CSV), CSRF (Origin salah → ditolak), timing login, rate limit tiap tier, cookie flags, security headers, penolakan tanpa sesi.
+- [x] SSRF 100% (P6.7), tidak ada kebocoran rahasia (respons/log/CSV), CSRF (Origin salah → ditolak), timing login, rate limit tiap tier, cookie flags, security headers, penolakan tanpa sesi.
 
 ### P17.3 — Integrasi (infra ≥ 80%)
 
-- [ ] Transaksi & rollback, `FOR UPDATE SKIP LOCKED`, siklus pg-boss, enkripsi AAD mismatch, pagination & filter waktu, monitor jatuh tempo, eksekusi ganda dicegah.
+- [x] Transaksi & rollback, `FOR UPDATE SKIP LOCKED`, siklus pg-boss, enkripsi AAD mismatch, pagination & filter waktu, monitor jatuh tempo, eksekusi ganda dicegah.
 
 ### P17.4 — End-to-End (Playwright)
 
 Dengan server target lokal yang dapat dikendalikan (OK/gagal/lambat) dan Telegram tiruan:
 
-- [ ] 1. Login (cookie `HttpOnly`).
-- [ ] 2. Buat monitor.
-- [ ] 3. Atur autentikasi & assertion.
-- [ ] 4. Jalankan pemeriksaan manual.
-- [ ] 5. Lihat hasil & riwayat.
-- [ ] 6. Lihat grafik uptime & latency.
-- [ ] 7. Simulasikan kegagalan → insiden terbuka.
-- [ ] 8. Simulasikan pemulihan → insiden tertutup.
-- [ ] 9. Atur Telegram & uji pengiriman (mock).
-- [ ] 10. Ekspor CSV.
-- [ ] 11. Halaman/endpoint terlindungi menolak akses tanpa sesi.
+- [x] 1. Login (cookie `HttpOnly`).
+- [x] 2. Buat monitor.
+- [x] 3. Atur autentikasi & assertion.
+- [x] 4. Jalankan pemeriksaan manual.
+- [x] 5. Lihat hasil & riwayat.
+- [x] 6. Lihat grafik uptime & latency.
+- [x] 7. Simulasikan kegagalan → insiden terbuka.
+- [x] 8. Simulasikan pemulihan → insiden tertutup.
+- [x] 9. Atur Telegram & uji pengiriman (mock).
+- [x] 10. Ekspor CSV.
+- [x] 11. Halaman/endpoint terlindungi menolak akses tanpa sesi.
 
 **Ref:** PRD §5.6.
 
 ### P17.5 — Gerbang CI
 
-- [ ] Gagalkan build bila cakupan di bawah ambang, boundary dilanggar, atau E2E gagal; simpan artefak laporan/trace Playwright.
+- [x] Gagalkan build bila cakupan di bawah ambang, boundary dilanggar, atau E2E gagal; simpan artefak laporan/trace Playwright.
 
 ---
 

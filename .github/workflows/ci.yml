@@ -76,10 +76,67 @@ jobs:
       - name: Run Integration Tests
         run: bun run test:integration
 
+  e2e-tests:
+    name: End-to-End Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sentinel_user
+          POSTGRES_PASSWORD: sentinel_password
+          POSTGRES_DB: api_sentinel_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_e2e
+      APP_KEYRING: '{"activeKeyId":"k1","keys":{"k1":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="}}'
+      SESSION_SECRET: min32CharactersLongCryptographicallySecureStringForCookieSigningAndHMAC
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Database Migrations & Seed
+        run: |
+          bun run db:migrate
+          bun run db:seed
+
+      - name: Install Playwright Browsers
+        run: bun x playwright install chromium --with-deps
+
+      - name: Run Playwright E2E Tests
+        run: bun run test:e2e
+
+      - name: Upload Playwright Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
   build:
     name: Build Workspaces
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
+    needs: [unit-tests, integration-tests, e2e-tests]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
