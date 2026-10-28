@@ -1,5 +1,6 @@
 import { stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
+import { parseArgs } from "node:util";
 import { LoginRequestSchema } from "@sentinel/contracts";
 import { NodeArgon2HasherAdapter } from "../crypto/node-argon2-hasher.adapter.js";
 import { createDrizzleDb, createPgPool } from "../db/connection.js";
@@ -116,7 +117,21 @@ export async function createOwnerAccount(
 }
 
 if (import.meta.main || process.argv[1]?.endsWith("owner-create.ts")) {
-  createOwnerAccount()
+  const { values } = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      username: { type: "string", short: "u" },
+      password: { type: "string", short: "p" },
+      databaseUrl: { type: "string", short: "d" },
+    },
+    strict: false,
+  });
+
+  createOwnerAccount({
+    username: values.username as string | undefined,
+    password: values.password as string | undefined,
+    databaseUrl: values.databaseUrl as string | undefined,
+  })
     .then((result) => {
       if (result.success) {
         console.log(`[SUCCESS] ${result.message} (User ID: ${result.userId})`);
