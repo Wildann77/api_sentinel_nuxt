@@ -34,6 +34,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.6.2",
     "@opentelemetry/otlp-exporter-base": "0.300.0",
+    "@playwright/test": "1.64.1",
     "@testcontainers/postgresql": "^10.19.0",
     "@types/node": "^24.11.1",
     "@vitest/coverage-v8": "^3.2.0",
