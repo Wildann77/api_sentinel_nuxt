@@ -287,5 +287,80 @@ describe("P2.8 & P2.9 — Monitor Aggregate Root & Incident Entity", () => {
         ValidationException,
       );
     });
+
+    it("validates incident constructor invariants", () => {
+      expect(
+        () =>
+          new Incident({
+            id: null as unknown as UUIDv7,
+            monitorId,
+            causeCategory: FailureCategory.HTTP_STATUS_MISMATCH,
+            initialErrorMessage: "err",
+            startedAt: new Date(),
+          }),
+      ).toThrow(ValidationException);
+
+      expect(
+        () =>
+          new Incident({
+            id: makeUuid(),
+            monitorId,
+            causeCategory: FailureCategory.HTTP_STATUS_MISMATCH,
+            initialErrorMessage: "  ",
+            startedAt: new Date(),
+          }),
+      ).toThrow(ValidationException);
+
+      // Pre-resolved incident with recoveredAt computes duration
+      const start = new Date("2026-10-23T10:00:00.000Z");
+      const rec = new Date("2026-10-23T10:02:00.000Z");
+      const resolved = new Incident({
+        id: makeUuid(),
+        monitorId,
+        causeCategory: FailureCategory.HTTP_STATUS_MISMATCH,
+        initialErrorMessage: "err",
+        startedAt: start,
+        recoveredAt: rec,
+        isResolved: true,
+      });
+      expect(resolved.durationSeconds).toBe(120);
+    });
+
+    it("computes next run date with clamped jitter bounds", () => {
+      const mon = createTestMonitor({ intervalSeconds: 60 });
+      const base = new Date("2026-10-23T12:00:00.000Z");
+
+      // Clamped minimum jitter: -0.05 -> 57s
+      const minRun = mon.computeNextRun(base, 60, -0.2);
+      expect(minRun.getTime() - base.getTime()).toBe(57000);
+
+      // Clamped maximum jitter: +0.05 -> 63s
+      const maxRun = mon.computeNextRun(base, 60, 0.2);
+      expect(maxRun.getTime() - base.getTime()).toBe(63000);
+
+      // Default random jitter is within [57s, 63s]
+      const randomRun = mon.computeNextRun(base, 60);
+      const diff = randomRun.getTime() - base.getTime();
+      expect(diff).toBeGreaterThanOrEqual(57000);
+      expect(diff).toBeLessThanOrEqual(63000);
+    });
+
+    it("pauses and resumes monitor state and increments version", () => {
+      const mon = createTestMonitor();
+      expect(mon.version).toBe(1);
+      expect(mon.isActive).toBe(true);
+
+      mon.pause();
+      expect(mon.isActive).toBe(false);
+      expect(mon.healthStatus).toBe("PAUSED");
+      expect(mon.version).toBe(2);
+
+      const resumeTime = new Date("2026-10-23T13:00:00.000Z");
+      mon.resume(resumeTime);
+      expect(mon.isActive).toBe(true);
+      expect(mon.healthStatus).toBe("UNKNOWN");
+      expect(mon.nextRunAt).toEqual(resumeTime);
+      expect(mon.version).toBe(3);
+    });
   });
 });
