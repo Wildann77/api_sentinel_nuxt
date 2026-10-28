@@ -4,12 +4,15 @@ import {
   FakeCipher,
   FakeClock,
   FakeQueue,
+  InMemoryCheckResultRepository,
   InMemoryMonitorRepository,
   SequentialIdGenerator,
 } from "../src/test-doubles/index.js";
 import {
   CreateMonitor,
   DeleteMonitor,
+  GetMonitor,
+  ListMonitors,
   PauseMonitor,
   ResumeMonitor,
   UpdateMonitor,
@@ -17,6 +20,7 @@ import {
 
 describe("Fase 8 — Monitor Use Cases Unit Tests", () => {
   let monitorRepo: InMemoryMonitorRepository;
+  let checkResultRepo: InMemoryCheckResultRepository;
   let cipher: FakeCipher;
   let clock: FakeClock;
   let idGen: SequentialIdGenerator;
@@ -27,9 +31,12 @@ describe("Fase 8 — Monitor Use Cases Unit Tests", () => {
   let pauseMonitor: PauseMonitor;
   let resumeMonitor: ResumeMonitor;
   let deleteMonitor: DeleteMonitor;
+  let listMonitors: ListMonitors;
+  let getMonitor: GetMonitor;
 
   beforeEach(() => {
     monitorRepo = new InMemoryMonitorRepository();
+    checkResultRepo = new InMemoryCheckResultRepository();
     cipher = new FakeCipher();
     clock = new FakeClock(new Date("2026-10-24T10:00:00.000Z"));
     idGen = new SequentialIdGenerator();
@@ -40,6 +47,8 @@ describe("Fase 8 — Monitor Use Cases Unit Tests", () => {
     pauseMonitor = new PauseMonitor(monitorRepo, queue);
     resumeMonitor = new ResumeMonitor(monitorRepo, clock);
     deleteMonitor = new DeleteMonitor(monitorRepo, queue);
+    listMonitors = new ListMonitors(monitorRepo, checkResultRepo);
+    getMonitor = new GetMonitor(monitorRepo);
   });
 
   describe("P8.1 — CreateMonitor", () => {
@@ -109,7 +118,7 @@ describe("Fase 8 — Monitor Use Cases Unit Tests", () => {
 
     it("rejects name longer than 100 characters", async () => {
       const longName = "A".repeat(101);
-      expect(
+      await expect(
         createMonitor.execute({
           name: longName,
           url: "https://api.example.com/health",
@@ -398,6 +407,134 @@ describe("Fase 8 — Monitor Use Cases Unit Tests", () => {
       await expect(pauseMonitor.execute(missingId)).rejects.toThrow(EntityNotFoundException);
       await expect(resumeMonitor.execute(missingId)).rejects.toThrow(EntityNotFoundException);
       await expect(deleteMonitor.execute(missingId)).rejects.toThrow(EntityNotFoundException);
+    });
+  });
+
+  describe("P8.4 — GetMonitor & ListMonitors", () => {
+    it("GetMonitor retrieves monitor by id and returns MonitorResponseDto", async () => {
+      const created = await createMonitor.execute({
+        name: "Gateway Service",
+        url: "https://api.example.com/gw",
+      });
+
+      const fetched = await getMonitor.execute(created.id);
+      expect(fetched.id).toBe(created.id);
+      expect(fetched.name).toBe("Gateway Service");
+
+      await expect(getMonitor.execute("")).rejects.toThrow(ValidationException);
+      await expect(getMonitor.execute("01940000-0000-7000-8000-000000000099")).rejects.toThrow(
+        EntityNotFoundException,
+      );
+    });
+
+    it("ListMonitors retrieves paginated monitors with sparkline points", async () => {
+      const m1 = await createMonitor.execute({
+        name: "Alpha API",
+        url: "https://alpha.example.com",
+      });
+      await createMonitor.execute({
+        name: "Beta API",
+        url: "https://beta.example.com",
+      });
+
+      const result = await listMonitors.execute({ limit: 10 });
+      expect(result.items.length).toBe(2);
+      expect(result.hasMore).toBe(false);
+
+      const filtered = await listMonitors.execute({ search: "Alpha" });
+      expect(filtered.items.length).toBe(1);
+      expect(filtered.items[0]?.id).toBe(m1.id);
+    });
+  });
+
+  describe("P8.5 — UpdateMonitor Advanced Invariants", () => {
+    it("updates monitor customHeaders and body with re-encryption and masked retention", async () => {
+      const created = await createMonitor.execute({
+        name: "Auth Monitor",
+        url: "https://auth.example.com",
+        customHeaders: { "X-Api-Key": "secret-123" },
+        body: '{"ping":true}',
+        auth: { type: "BEARER", token: "bearer-token-123" },
+      });
+
+      // Update with masked headers and masked body retains existing secrets
+      const updatedMasked = await updateMonitor.execute({
+        id: created.id,
+        customHeaders: { "X-Api-Key": "********" },
+        body: "********",
+        auth: { type: "BEARER", token: "********" },
+        version: created.version,
+      });
+
+      expect(updatedMasked.name).toBe("Auth Monitor");
+
+      // Update auth to NONE clears auth
+      const updatedNoneAuth = await updateMonitor.execute({
+        id: created.id,
+        auth: { type: "NONE" },
+        version: updatedMasked.version,
+      });
+      expect(updatedNoneAuth.authType).toBe("NONE");
+
+      // Update with new unmasked secrets re-encrypts
+      const updatedNew = await updateMonitor.execute({
+        id: created.id,
+        auth: { type: "BASIC", username: "user", password: "newpassword" },
+        body: '{"new":"body"}',
+        intervalSeconds: 120,
+        version: updatedNoneAuth.version,
+      });
+      expect(updatedNew.authType).toBe("BASIC");
+      expect(updatedNew.intervalSeconds).toBe(120);
+
+      // ConflictException on OCC version mismatch
+      await expect(
+        updateMonitor.execute({
+          id: created.id,
+          name: "Stale update",
+          version: 1, // Stale version
+        }),
+      ).rejects.toThrow(ConflictException);
+
+      // EntityNotFoundException on missing id
+      await expect(
+        updateMonitor.execute({
+          id: "01940000-0000-7000-8000-000000000099",
+          name: "Non-existent",
+        }),
+      ).rejects.toThrow(EntityNotFoundException);
+    });
+
+    it("supports BASIC, API_KEY and CUSTOM_HEADER auth types in update", async () => {
+      const created = await createMonitor.execute({
+        name: "Flexible Auth Monitor",
+        url: "https://flex.example.com",
+      });
+
+      const withApiKey = await updateMonitor.execute({
+        id: created.id,
+        auth: { type: "API_KEY", headerName: "x-key", apiKey: "api-secret-val" },
+      });
+      expect(withApiKey.authType).toBe("API_KEY");
+
+      const withCustomHeader = await updateMonitor.execute({
+        id: created.id,
+        auth: { type: "CUSTOM_HEADER", headers: { "X-Custom": "custom-val" } },
+      });
+      expect(withCustomHeader.authType).toBe("CUSTOM_HEADER");
+
+      const withCustomHeaderMasked = await updateMonitor.execute({
+        id: created.id,
+        auth: { type: "CUSTOM_HEADER", headers: { "X-Custom": "********" } },
+      });
+      expect(withCustomHeaderMasked.authType).toBe("CUSTOM_HEADER");
+
+      // Body cleared with empty string
+      const withEmptyBody = await updateMonitor.execute({
+        id: created.id,
+        body: "",
+      });
+      expect(withEmptyBody.bodySnippet).toBeUndefined();
     });
   });
 });
