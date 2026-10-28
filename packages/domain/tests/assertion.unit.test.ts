@@ -419,4 +419,234 @@ describe("P2.6 — AssertionEngine (Safe AST Parser & Evaluator)", () => {
     expect(result.results[2]?.status).toBe("PASS");
     expect(result.failureCategory).toBe(FailureCategory.HEADER_ASSERTION_FAILED);
   });
+
+  it("evaluates status not_equals operator and empty expected fallback", () => {
+    const notEqualsRule = AssertionRule.parse({
+      type: "status",
+      operator: "not_equals",
+      expected: [500, 502],
+    });
+
+    const passRes: HttpResponseData = { statusCode: 200, headers: {} };
+    expect(AssertionEngine.evaluate([notEqualsRule], passRes).passed).toBe(true);
+
+    const failRes: HttpResponseData = { statusCode: 500, headers: {} };
+    const failResult = AssertionEngine.evaluate([notEqualsRule], failRes);
+    expect(failResult.passed).toBe(false);
+    expect(failResult.failureCategory).toBe(FailureCategory.HTTP_STATUS_MISMATCH);
+  });
+
+  it("evaluates header equals and contains when header is missing or header is array", () => {
+    const equalsRule = AssertionRule.parse({
+      type: "header",
+      target: "X-Env",
+      operator: "equals",
+      expected: "production",
+    });
+
+    const missingRes: HttpResponseData = { statusCode: 200, headers: {} };
+    const missingResResult = AssertionEngine.evaluate([equalsRule], missingRes);
+    expect(missingResResult.passed).toBe(false);
+    expect(missingResResult.results[0]?.message).toContain("tidak ditemukan");
+
+    const mismatchRes: HttpResponseData = {
+      statusCode: 200,
+      headers: { "X-Env": "staging" },
+    };
+    const mismatchResult = AssertionEngine.evaluate([equalsRule], mismatchRes);
+    expect(mismatchResult.passed).toBe(false);
+    expect(mismatchResult.results[0]?.message).toContain(
+      'Expected header "X-Env" to equal "production"',
+    );
+
+    const containsRule = AssertionRule.parse({
+      type: "header",
+      target: "X-Custom",
+      operator: "contains",
+      expected: "val2",
+    });
+    const missingContains = AssertionEngine.evaluate([containsRule], missingRes);
+    expect(missingContains.passed).toBe(false);
+
+    const arrayHeaderRes: HttpResponseData = {
+      statusCode: 200,
+      headers: { "X-Custom": ["val1", "val2"] },
+    };
+    expect(AssertionEngine.evaluate([containsRule], arrayHeaderRes).passed).toBe(true);
+
+    const mismatchContainsRes: HttpResponseData = {
+      statusCode: 200,
+      headers: { "X-Custom": "other" },
+    };
+    expect(AssertionEngine.evaluate([containsRule], mismatchContainsRes).passed).toBe(false);
+  });
+
+  it("evaluates body-json not_equals operator", () => {
+    const notEqualsRule = AssertionRule.parse({
+      type: "body-json",
+      target: "$.status",
+      operator: "not_equals",
+      expected: "ERROR",
+    });
+
+    const passRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ status: "OK" }),
+    };
+    expect(AssertionEngine.evaluate([notEqualsRule], passRes).passed).toBe(true);
+
+    const failRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ status: "ERROR" }),
+    };
+    const failResult = AssertionEngine.evaluate([notEqualsRule], failRes);
+    expect(failResult.passed).toBe(false);
+    expect(failResult.failureCategory).toBe(FailureCategory.BODY_ASSERTION_FAILED);
+
+    const missingRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ count: 10 }),
+    };
+    const missingResult = AssertionEngine.evaluate([notEqualsRule], missingRes);
+    expect(missingResult.passed).toBe(false);
+    expect(missingResult.results[0]?.message).toContain("tidak ditemukan");
+  });
+
+  it("evaluates body-json exists operator with multiple nodes and empty nodes", () => {
+    const existsRule = AssertionRule.parse({
+      type: "body-json",
+      target: "$.items[*]",
+      operator: "exists",
+    });
+
+    const multiRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ items: ["a", "b"] }),
+    };
+    const multiResult = AssertionEngine.evaluate([existsRule], multiRes);
+    expect(multiResult.passed).toBe(true);
+    expect(Array.isArray(multiResult.results[0]?.actual)).toBe(true);
+
+    const emptyRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ items: [] }),
+    };
+    const emptyResult = AssertionEngine.evaluate([existsRule], emptyRes);
+    expect(emptyResult.passed).toBe(false);
+  });
+
+  it("evaluates body-json contains operator when target is missing or mismatch", () => {
+    const containsRule = AssertionRule.parse({
+      type: "body-json",
+      target: "$.message",
+      operator: "contains",
+      expected: "healthy",
+    });
+
+    const missingRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ other: "data" }),
+    };
+    const missingResult = AssertionEngine.evaluate([containsRule], missingRes);
+    expect(missingResult.passed).toBe(false);
+    expect(missingResult.results[0]?.message).toContain("tidak ditemukan");
+
+    const mismatchRes: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ message: 12345 }),
+    };
+    const mismatchResult = AssertionEngine.evaluate([containsRule], mismatchRes);
+    expect(mismatchResult.passed).toBe(false);
+  });
+
+  it("handles null, undefined, and empty string bodyText", () => {
+    const rule = AssertionRule.parse({
+      type: "body-json",
+      target: "$.ok",
+      operator: "exists",
+    });
+
+    const nullRes: HttpResponseData = { statusCode: 200, headers: {}, bodyText: null };
+    expect(AssertionEngine.evaluate([rule], nullRes).passed).toBe(false);
+
+    const emptyRes: HttpResponseData = { statusCode: 200, headers: {}, bodyText: "   " };
+    expect(AssertionEngine.evaluate([rule], emptyRes).passed).toBe(false);
+  });
+
+  it("handles JSONPath parsing exception inside AssertionEngine", () => {
+    const invalidAstRule = {
+      type: "body-json",
+      target: "$[invalid bracket",
+      operator: "exists",
+    } as unknown as AssertionRule;
+
+    const res: HttpResponseData = {
+      statusCode: 200,
+      headers: {},
+      bodyText: JSON.stringify({ a: 1 }),
+    };
+
+    const result = AssertionEngine.evaluate([invalidAstRule], res);
+    expect(result.passed).toBe(false);
+    expect(result.failureCategory).toBe(FailureCategory.BODY_ASSERTION_FAILED);
+    expect(result.results[0]?.message).toContain("JSONPath parsing gagal");
+  });
+
+  it("thoroughly tests JsonPathParser syntax and AST evaluator edge cases", () => {
+    // Non-string or empty query
+    expect(() => JsonPathParser.parse(null as unknown as string)).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("A".repeat(101))).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("no-dollar")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$.")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$..")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$..123bad")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$.__proto__")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$.prototype")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$.constructor")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$[?(@.id == 1)]")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$[unclosed")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$[]")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$['__proto__']")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$[-5]")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$[invalid!]")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$['unclosed")).toThrow(ValidationException);
+    expect(() => JsonPathParser.parse("$['bad'trailing]")).toThrow(ValidationException);
+
+    // Valid bracket string properties: single quote, double quote
+    const bracketSingle = JsonPathParser.parse("$['user-name']");
+    expect(JsonPathParser.evaluate(bracketSingle, { "user-name": "alice" })).toEqual(["alice"]);
+
+    const bracketDouble = JsonPathParser.parse('$["id"]');
+    expect(JsonPathParser.evaluate(bracketDouble, { id: 42 })).toEqual([42]);
+
+    // Array index
+    const indexAst = JsonPathParser.parse("$.items[1]");
+    expect(JsonPathParser.evaluate(indexAst, { items: ["first", "second", "third"] })).toEqual([
+      "second",
+    ]);
+    expect(JsonPathParser.evaluate(indexAst, { items: ["only_one"] })).toEqual([]);
+    expect(JsonPathParser.evaluate(indexAst, { items: "not_array" })).toEqual([]);
+
+    // Wildcard on objects and primitives
+    const wildcardAst = JsonPathParser.parse("$.data.*");
+    expect(JsonPathParser.evaluate(wildcardAst, { data: { a: 1, b: 2 } })).toEqual([1, 2]);
+    expect(JsonPathParser.evaluate(wildcardAst, { data: null })).toEqual([]);
+    expect(JsonPathParser.evaluate(wildcardAst, { data: "primitive" })).toEqual([]);
+
+    // Recursive on non-object root
+    const recAst = JsonPathParser.parse("$..val");
+    expect(JsonPathParser.evaluate(recAst, "just string")).toEqual([]);
+    expect(JsonPathParser.evaluate(recAst, null)).toEqual([]);
+    expect(
+      JsonPathParser.evaluate(recAst, { nested: { val: 99 }, other: [1, { val: 100 }] }),
+    ).toEqual([99, 100]);
+  });
 });
