@@ -161,4 +161,50 @@ describe("P2.10 — Kalkulator Uptime & Agregasi Murni", () => {
     expect(aggregated.uptimePercentage).toBeNull();
     expect(aggregated.avgLatencyMs).toBeNull();
   });
+
+  it("throws ValidationException on invalid calculateUptime parameters", () => {
+    expect(() => calculateUptime(-1, 10)).toThrow(ValidationException);
+    expect(() => calculateUptime(11, 10)).toThrow(ValidationException);
+    expect(calculateUptime(0, -5)).toBeNull();
+  });
+
+  it("throws ValidationException on invalid metric buckets", () => {
+    expect(() => aggregateMetricBuckets([{ total: -1, success: 0, avgLatencyMs: 100 }])).toThrow(
+      ValidationException,
+    );
+
+    expect(() => aggregateMetricBuckets([{ total: 10, success: -1, avgLatencyMs: 100 }])).toThrow(
+      ValidationException,
+    );
+
+    expect(() => aggregateMetricBuckets([{ total: 10, success: 15, avgLatencyMs: 100 }])).toThrow(
+      ValidationException,
+    );
+  });
+
+  it("supports CheckResult.create factory method with full parameters", () => {
+    const now = new Date();
+    const result = CheckResult.create({
+      id: makeUuid(10),
+      monitorId: makeUuid(11),
+      incidentId: null,
+      triggerType: TriggerType.SCHEDULED,
+      scheduledFor: now,
+      startedAt: now,
+      finishedAt: now,
+      durationMs: 45,
+      isSuccess: true,
+      statusCode: 200,
+      failureCategory: null,
+      assertionResults: [],
+      diagnostic: null,
+      correlationId: "corr-factory",
+      pinnedIp: "127.0.0.1",
+    });
+
+    expect(result.id).toBeDefined();
+    expect(result.isSuccess).toBe(true);
+    expect(result.durationMs).toBe(45);
+    expect(result.sanitizedDiagnostic).toBeNull();
+  });
 });
