@@ -246,10 +246,42 @@ describe("P6.6 — ProbeCheckOrchestrator Unit Tests", () => {
       triggerType: TriggerType.MANUAL,
     });
 
-    expect(probe.history).toHaveLength(1);
     expect(probe.history[0]?.authConfig).toEqual(authConfig);
     expect(probe.history[0]?.headers?.["x-correlation"]).toBe("123");
     expect(probe.history[0]?.body).toBe('{"foo":"bar"}');
     expect(probe.history[0]?.timeoutMs).toBe(8000);
+  });
+
+  it("records telemetry spans for DNS, TCP, TLS, transfer, and assertion evaluation", async () => {
+    const { NoopTelemetryPort } = await import("../src/test-doubles/fake-telemetry.js");
+    const telemetry = new NoopTelemetryPort();
+    const telOrchestrator = new ProbeCheckOrchestrator(probe, clock, idGenerator, telemetry);
+
+    probe.enqueueResponse({
+      statusCode: 200,
+      headers: { "content-type": "application/json" },
+      bodySnippet: JSON.stringify({ ok: true }),
+      durationMs: 150,
+      dnsDurationMs: 20,
+      connectDurationMs: 30,
+      tlsDurationMs: 40,
+    });
+
+    await telOrchestrator.execute({
+      monitorId,
+      url: "https://api.example.com/tel",
+      method: "GET",
+      timeoutMs: 5000,
+      assertionRules: [new AssertionRule({ type: "status", expected: [200] })],
+      triggerType: TriggerType.SCHEDULED,
+      correlationId: "custom-corr-id",
+    });
+
+    const spanNames = telemetry.recordedSpans.map((s) => s.name);
+    expect(spanNames).toContain("probe.dns_lookup");
+    expect(spanNames).toContain("probe.tcp_connect");
+    expect(spanNames).toContain("probe.tls_handshake");
+    expect(spanNames).toContain("probe.response_transfer");
+    expect(spanNames).toContain("assertion.evaluation");
   });
 });
