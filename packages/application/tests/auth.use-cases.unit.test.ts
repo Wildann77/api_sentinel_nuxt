@@ -337,6 +337,84 @@ describe("P7.3 — Use Cases Autentikasi Unit Tests", () => {
           currentSessionToken: "invalid_token",
         }),
       ).rejects.toThrow(InvalidCredentialsException);
+
+      await expect(
+        changePasswordUseCase.execute({
+          request: {
+            currentPassword: "CorrectPassword123",
+            newPassword: "NewSecretPassword456!",
+          },
+          currentSessionToken: "",
+        }),
+      ).rejects.toThrow(InvalidCredentialsException);
+    });
+
+    it("rejects change password when request format is invalid (too short password)", async () => {
+      await expect(
+        changePasswordUseCase.execute({
+          request: {
+            currentPassword: "short",
+            newPassword: "short",
+          },
+          currentSessionToken: "some_token",
+        }),
+      ).rejects.toThrow(ValidationException);
+    });
+
+    it("rejects change password when session is idle expired or absolute expired", async () => {
+      const login = await authenticateUseCase.execute({
+        credentials: {
+          username: "sentinel_admin",
+          password: "CorrectPassword123",
+        },
+      });
+
+      // Advance clock past idle expiration (24h)
+      clock.advance(25 * 3600 * 1000);
+
+      await expect(
+        changePasswordUseCase.execute({
+          request: {
+            currentPassword: "CorrectPassword123",
+            newPassword: "NewSecretPassword456!",
+          },
+          currentSessionToken: login.token,
+        }),
+      ).rejects.toThrow(InvalidCredentialsException);
+    });
+
+    it("supports ChangeOwnerPassword without unitOfWork parameter", async () => {
+      const changePasswordNoUow = new ChangeOwnerPassword(
+        userRepo,
+        sessionRepo,
+        passwordHasher,
+        clock,
+        TEST_SECRET,
+      );
+
+      const login = await authenticateUseCase.execute({
+        credentials: {
+          username: "sentinel_admin",
+          password: "CorrectPassword123",
+        },
+      });
+
+      await changePasswordNoUow.execute({
+        request: {
+          currentPassword: "CorrectPassword123",
+          newPassword: "BrandNewPassword789!",
+        },
+        currentSessionToken: login.token,
+      });
+
+      const updatedUser = await userRepo.findById(mockUser.id);
+      expect(updatedUser?.passwordHash).toBe("fake_hash:BrandNewPassword789!");
+    });
+
+    it("throws error when sessionSecret length is less than 32 characters", () => {
+      expect(
+        () => new ChangeOwnerPassword(userRepo, sessionRepo, passwordHasher, clock, "short-secret"),
+      ).toThrow("SESSION_SECRET must be at least 32 characters long");
     });
   });
 });
