@@ -16,6 +16,8 @@ onMounted(() => {
   socket.subscribe();
 });
 
+const isStale = computed<boolean>(() => socket.status.value !== "LIVE");
+
 // Stopwatch live timer
 const now = ref(Date.now());
 let stopwatchTimer: ReturnType<typeof setInterval> | null = null;
@@ -220,6 +222,12 @@ const columns: TableColumn<IncidentDto>[] = [
           <h1 class="text-sm sm:text-base font-bold tracking-wider text-text-primary uppercase">
             [03: INCIDENTS MANAGEMENT]
           </h1>
+          <span
+            v-if="isStale"
+            class="text-[10px] text-ws-disconnected font-bold border border-ws-disconnected/40 px-1 py-0.5 bg-ws-disconnected/10 select-none"
+          >
+            (STALE DATA)
+          </span>
         </div>
         <p class="text-xs text-text-secondary mt-1">
           Pelacakan insiden aktif secara real-time, stopwatch downtime detik-demi-detik, dan riwayat arsip gangguan.
@@ -238,8 +246,13 @@ const columns: TableColumn<IncidentDto>[] = [
       </div>
     </div>
 
-    <!-- Active Incident Banner (DES §5.6 & TASK P15.6) -->
-    <div v-if="activeIncidents.length > 0" class="space-y-3">
+    <!-- Active Incident Banner (DES §5.6, §8 & TASK P15.6) -->
+    <div
+      v-if="activeIncidents.length > 0"
+      class="space-y-3"
+      role="status"
+      aria-live="polite"
+    >
       <div
         v-for="incident in activeIncidents"
         :key="incident.id"
@@ -347,13 +360,13 @@ const columns: TableColumn<IncidentDto>[] = [
     <!-- Error State -->
     <ProblemAlert
       v-if="incidentsError"
-      title="[GAGAL MEMUAT ARSIP INSIDEN]"
-      :description="incidentsError.message"
-      class="rounded-none"
+      :error="incidentsError"
+      retryable
+      @retry="handleManualRefresh"
     />
 
-    <!-- Archive Table Card -->
-    <div class="border border-hairline bg-surface overflow-x-auto">
+    <!-- Archive Table Card Desktop & Tablet (>= 768px) DES §9 -->
+    <div class="hidden md:block border border-hairline bg-surface overflow-x-auto">
       <!-- Loading Skeleton -->
       <div v-if="isLoading" class="p-4 space-y-3">
         <div class="text-xs text-text-muted animate-pulse">
@@ -396,7 +409,7 @@ const columns: TableColumn<IncidentDto>[] = [
           <div class="flex flex-col min-w-[140px] max-w-[220px]">
             <NuxtLink
               :to="`/dashboard/monitors/${row.original.monitorId}`"
-              class="font-semibold text-text-primary hover:text-brand-accent transition-colors truncate"
+              class="font-semibold text-text-primary hover:text-brand-accent transition-colors truncate min-h-[36px] flex items-center"
             >
               {{ row.original.monitorName || row.original.monitorId.slice(0, 8) }}
             </NuxtLink>
@@ -483,10 +496,80 @@ const columns: TableColumn<IncidentDto>[] = [
             label="INSPECT"
             size="xs"
             variant="outline"
+            class="min-h-[36px]"
             @click="openInspection(row.original.id)"
           />
         </template>
       </UTable>
+    </div>
+
+    <!-- Mobile Card List View (< 768px) DES §9 -->
+    <div class="md:hidden space-y-3" aria-label="Daftar Kartu Arsip Insiden">
+      <div v-if="isLoading" class="space-y-3">
+        <div v-for="i in 3" :key="i" class="border border-hairline bg-surface p-3 space-y-2 animate-pulse">
+          <div class="h-5 bg-surface-elevated w-1/3"></div>
+          <div class="h-4 bg-surface-elevated w-2/3"></div>
+        </div>
+      </div>
+      <EmptyState
+        v-else-if="filteredIncidents.length === 0"
+        title="[SEMUA SISTEM BEROPERASI NORMAL]"
+        description="Tidak ada insiden aktif atau riwayat gangguan tercatat pada kriteria pencarian ini."
+        icon="i-lucide-shield-check"
+      />
+      <div
+        v-else
+        v-for="inc in filteredIncidents"
+        :key="inc.id"
+        class="border border-hairline bg-surface p-3 space-y-2.5 font-mono text-xs"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5">
+            <span
+              class="inline-flex items-center px-2 py-0.5 text-[11px] font-bold uppercase rounded-xs border select-none whitespace-nowrap"
+              :class="getIncidentStatusBadgeClass(resolveIncidentStatus(inc))"
+            >
+              [{{ resolveIncidentStatus(inc) }}]
+            </span>
+            <span class="text-[10px] text-text-muted">#{{ inc.id.slice(0, 8) }}</span>
+          </div>
+          <BracketButton
+            label="INSPECT"
+            size="xs"
+            variant="outline"
+            class="min-h-[44px]"
+            @click="openInspection(inc.id)"
+          />
+        </div>
+
+        <div>
+          <NuxtLink
+            :to="`/dashboard/monitors/${inc.monitorId}`"
+            class="font-semibold text-text-primary hover:text-brand-accent transition-colors block text-xs min-h-[44px] flex items-center"
+          >
+            {{ inc.monitorName || inc.monitorId.slice(0, 8) }}
+          </NuxtLink>
+          <div class="text-[11px] text-text-muted mt-0.5 truncate">
+            {{ inc.lastFailureReason || 'Pemeriksaan gagal memenuhi assertion' }}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-hairline/60 text-[11px]">
+          <div>
+            <span class="text-text-muted block text-[10px]">DURASI:</span>
+            <span v-if="inc.resolvedAt" class="font-bold text-text-primary">
+              {{ formatDuration(inc.durationSeconds) }}
+            </span>
+            <span v-else class="text-status-down font-bold">
+              {{ formatStopwatch(getLiveDowntimeSeconds(inc.openedAt)) }}
+            </span>
+          </div>
+          <div class="text-right">
+            <span class="text-text-muted block text-[10px]">MULAI GANGGUAN:</span>
+            <RelativeTime :value="inc.openedAt" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Incident Detail Inspection Slideover Drawer -->

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { useMonitorsQuery } from "../../../composables/use-monitors.js";
+import { useSentinelSocket } from "../../../composables/use-sentinel-socket.js";
 import {
   useChangePasswordMutation,
   useTelegramSettingsQuery,
@@ -13,11 +14,14 @@ definePageMeta({
 });
 
 const toast = useToast();
+const socket = useSentinelSocket({ autoConnect: true });
+const isStale = computed<boolean>(() => socket.status.value !== "LIVE");
 
 // 1. Telegram Integration Section
 const {
   data: telegramSettings,
   isLoading: isTelegramLoading,
+  error: telegramError,
   refetch: refetchTelegram,
 } = useTelegramSettingsQuery();
 
@@ -257,6 +261,14 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
 
 <template>
   <div class="space-y-6 font-mono">
+    <!-- RFC 9457 ProblemAlert for Query Errors -->
+    <ProblemAlert
+      v-if="telegramError"
+      :error="telegramError"
+      retryable
+      @retry="() => refetchTelegram()"
+    />
+
     <!-- Header Section -->
     <div class="border-b border-hairline pb-4">
       <div class="flex items-center gap-2">
@@ -264,6 +276,12 @@ function handleDownloadCsv(type: "checks" | "incidents"): void {
         <h1 class="text-sm sm:text-base font-bold tracking-wider text-text-primary uppercase">
           [04: SYSTEM SETTINGS & INTEGRATIONS]
         </h1>
+        <span
+          v-if="isStale"
+          class="text-[10px] text-ws-disconnected font-bold border border-ws-disconnected/40 px-1 py-0.5 bg-ws-disconnected/10 select-none"
+        >
+          (STALE DATA)
+        </span>
       </div>
       <p class="text-xs text-text-secondary mt-1">
         Konfigurasi integrasi notifikasi Telegram, manajemen kredensial pemilik, dan ekspor laporan telemetri CSV.

@@ -12,6 +12,7 @@ import {
   useResumeMonitorMutation,
   useTriggerCheckMutation,
 } from "../../../../composables/use-monitors.js";
+import { useSentinelSocket } from "../../../../composables/use-sentinel-socket.js";
 
 definePageMeta({
   layout: "default",
@@ -20,6 +21,9 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const socket = useSentinelSocket({ autoConnect: true });
+
+const isStale = computed<boolean>(() => socket.status.value !== "LIVE");
 
 const monitorId = computed<string>(() => String(route.params.id || ""));
 
@@ -284,6 +288,12 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             <h1 class="text-sm sm:text-base font-bold tracking-wider text-text-primary uppercase truncate">
               {{ monitor.name }}
             </h1>
+            <span
+              v-if="isStale"
+              class="text-[10px] text-ws-disconnected font-bold border border-ws-disconnected/40 px-1 py-0.5 bg-ws-disconnected/10 select-none"
+            >
+              (STALE DATA)
+            </span>
           </div>
 
           <!-- URL with copy button -->
@@ -313,6 +323,7 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             :label="isTriggering ? 'PROBE ENQUEUED...' : 'TRIGGER CHECK'"
             variant="solid"
             size="xs"
+            class="min-h-[36px]"
             :disabled="isTriggering"
             @click="handleTriggerCheck"
           />
@@ -321,6 +332,7 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             :label="(!monitor.isActive || monitor.healthStatus === 'PAUSED') ? 'RESUME' : 'PAUSE'"
             variant="outline"
             size="xs"
+            class="min-h-[36px]"
             @click="handleTogglePause"
           />
 
@@ -328,6 +340,7 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             label="EDIT"
             variant="outline"
             size="xs"
+            class="min-h-[36px]"
             :to="`/dashboard/monitors/${monitor.id}/edit`"
           />
 
@@ -335,6 +348,7 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             label="HAPUS"
             variant="danger"
             size="xs"
+            class="min-h-[36px]"
             @click="isDeleteModalOpen = true"
           />
         </div>
@@ -432,7 +446,8 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
           </div>
         </div>
 
-        <div class="border border-hairline bg-surface overflow-hidden">
+        <!-- Desktop & Tablet Table (>= 768px) -->
+        <div class="hidden md:block border border-hairline bg-surface overflow-hidden">
           <UTable
             :data="checksList"
             :columns="tableColumns"
@@ -511,6 +526,65 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
             </template>
           </UTable>
         </div>
+
+        <!-- Mobile Card List View (< 768px) DES §9 -->
+        <div class="md:hidden space-y-2.5" aria-label="Riwayat Pemeriksaan Mobile">
+          <div
+            v-if="checksQuery.isLoading.value"
+            class="space-y-2"
+          >
+            <div v-for="i in 3" :key="i" class="border border-hairline bg-surface p-3 space-y-2 animate-pulse">
+              <div class="h-4 bg-surface-elevated w-1/3"></div>
+              <div class="h-4 bg-surface-elevated w-2/3"></div>
+            </div>
+          </div>
+          <div
+            v-else-if="checksList.length === 0"
+            class="p-6 border border-hairline bg-surface text-center text-text-muted text-xs font-mono"
+          >
+            [BELUM ADA RIWAYAT PEMERIKSAAN]
+          </div>
+          <div
+            v-else
+            v-for="check in checksList"
+            :key="check.id"
+            class="border border-hairline bg-surface p-3 space-y-2 font-mono text-xs"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-1.5 py-0.5 text-[11px] font-bold border rounded-none uppercase"
+                  :class="[
+                    check.status === 'UP'
+                      ? 'border-status-operational-border bg-status-operational-bg text-status-operational'
+                      : 'border-status-down-border bg-status-down-bg text-status-down',
+                  ]"
+                >
+                  {{ check.status === 'UP' ? 'PASS' : 'FAIL' }}
+                </span>
+                <span v-if="check.statusCode" class="text-xs text-text-secondary font-semibold">
+                  HTTP {{ check.statusCode }}
+                </span>
+              </div>
+              <BracketButton
+                label="[INSPECT]"
+                variant="outline"
+                size="xs"
+                class="min-h-[44px]"
+                @click="openInspection(check.id)"
+              />
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-hairline/50 text-[11px]">
+              <div>
+                <span class="text-text-muted">LATENCY: </span>
+                <span class="font-semibold text-brand-accent">{{ check.latencyMs !== null ? `${check.latencyMs} ms` : '-' }}</span>
+              </div>
+              <div class="text-right">
+                <RelativeTime :value="check.executedAt || check.finishedAt" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -524,9 +598,9 @@ const tableColumns: TableColumn<CheckResultDto>[] = [
     <!-- Delete Confirmation Modal -->
     <DestructiveConfirmModal
       :open="isDeleteModalOpen"
+      :target-name="monitor?.name ?? ''"
       title="HAPUS MONITOR DEFINITIF"
-      :message="`Apakah Anda yakin ingin menghapus monitor '${monitor?.name}' secara permanen? Seluruh riwayat probe dan metrik terkait akan dihapus.`"
-      confirm-label="HAPUS SEKARANG"
+      :description="`Apakah Anda yakin ingin menghapus monitor '${monitor?.name}' secara permanen? Seluruh riwayat probe dan metrik terkait akan dihapus.`"
       @update:open="isDeleteModalOpen = $event"
       @confirm="handleDeleteConfirm"
     />

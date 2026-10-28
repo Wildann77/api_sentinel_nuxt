@@ -50,7 +50,14 @@ const queryFilters = computed<ListMonitorsQueryDto>(() => {
   return filters;
 });
 
-const { data: monitorsPage, isLoading } = useMonitorsQuery(queryFilters);
+const {
+  data: monitorsPage,
+  isLoading,
+  error: monitorsError,
+  refetch: refetchMonitors,
+} = useMonitorsQuery(queryFilters);
+
+const isStale = computed<boolean>(() => socket.status.value !== "LIVE");
 
 const monitorsList = computed<MonitorResponseDto[]>(() => {
   return monitorsPage.value?.data ?? [];
@@ -86,6 +93,7 @@ const columns: TableColumn<MonitorResponseDto>[] = [
   {
     id: "sparkline",
     header: "HISTORY (20 PTS)",
+    class: "hidden lg:table-cell",
   },
   {
     id: "uptimeLatency",
@@ -279,6 +287,14 @@ function getActionItems(monitor: MonitorResponseDto) {
 
 <template>
   <div class="space-y-6">
+    <!-- RFC 9457 ProblemAlert for API Query Errors -->
+    <ProblemAlert
+      v-if="monitorsError"
+      :error="monitorsError"
+      retryable
+      @retry="refetchMonitors"
+    />
+
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-4">
       <div>
@@ -287,6 +303,12 @@ function getActionItems(monitor: MonitorResponseDto) {
           <h1 class="text-sm sm:text-base font-bold tracking-wider text-text-primary uppercase">
             [02: MONITORS INVENTORY]
           </h1>
+          <span
+            v-if="isStale"
+            class="text-[10px] text-ws-disconnected font-bold border border-ws-disconnected/40 px-1 py-0.5 bg-ws-disconnected/10 select-none"
+          >
+            (STALE DATA)
+          </span>
         </div>
         <p class="text-xs text-text-secondary mt-1">
           Inventarisasi endpoint API terdaftar, status health, telemetri latency, dan kontrol operasional cepat.
@@ -313,7 +335,7 @@ function getActionItems(monitor: MonitorResponseDto) {
             icon="i-lucide-search"
             class="w-full font-mono text-xs"
             :ui="{
-              base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none focus:border-brand-accent',
+              base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none focus:border-brand-accent min-h-[36px]',
             }"
           />
         </div>
@@ -325,20 +347,26 @@ function getActionItems(monitor: MonitorResponseDto) {
             :items="statusOptions"
             class="w-full font-mono text-xs"
             :ui="{
-              base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none',
+              base: 'font-mono text-xs bg-canvas text-text-primary border border-hairline rounded-none min-h-[36px]',
             }"
           />
         </div>
       </div>
 
       <!-- Inventory Count Badge -->
-      <div class="text-[11px] font-mono text-text-muted self-end sm:self-center select-none">
-        TOTAL: <span class="font-bold text-text-primary">{{ monitorsList.length }}</span> ENDPOINT
+      <div class="text-[11px] font-mono text-text-muted self-end sm:self-center select-none flex items-center gap-1.5">
+        <span
+          v-if="isStale"
+          class="text-ws-disconnected font-bold border border-ws-disconnected/40 px-1 py-0.5 bg-ws-disconnected/10 text-[10px]"
+        >
+          (STALE DATA)
+        </span>
+        <span>TOTAL: <span class="font-bold text-text-primary">{{ monitorsList.length }}</span> ENDPOINT</span>
       </div>
     </div>
 
-    <!-- Data Table Card -->
-    <div class="border border-hairline bg-surface overflow-hidden">
+    <!-- Desktop & Tablet Table Card (>= 768px) DES §9 -->
+    <div class="hidden md:block border border-hairline bg-surface overflow-hidden">
       <UTable
         :data="monitorsList"
         :columns="columns"
@@ -367,7 +395,7 @@ function getActionItems(monitor: MonitorResponseDto) {
           <div class="flex flex-col gap-1 min-w-[200px] max-w-[340px]">
             <NuxtLink
               :to="`/dashboard/monitors/${row.original.id}`"
-              class="font-bold text-text-primary hover:text-brand-accent transition-colors truncate"
+              class="font-bold text-text-primary hover:text-brand-accent transition-colors truncate min-h-[36px] flex items-center"
               :title="row.original.name"
             >
               {{ row.original.name }}
@@ -381,9 +409,9 @@ function getActionItems(monitor: MonitorResponseDto) {
           </div>
         </template>
 
-        <!-- Custom Sparkline History Cell -->
+        <!-- Custom Sparkline History Cell (hidden on tablet via column.class) -->
         <template #sparkline-cell="{ row }">
-          <div class="flex items-center gap-2">
+          <div class="hidden lg:flex items-center gap-2">
             <Sparkline
               :points="row.original.sparkline.map((p) => p.durationMs ?? 0)"
               :color="getSparklineColor(row.original.healthStatus)"
@@ -427,7 +455,7 @@ function getActionItems(monitor: MonitorResponseDto) {
             >
               <button
                 type="button"
-                class="font-mono text-xs px-2 py-1 rounded-none border border-hairline bg-surface hover:bg-surface-hover hover:border-hairline-strong transition-colors cursor-pointer select-none"
+                class="font-mono text-xs px-2.5 py-1 min-h-[36px] rounded-none border border-hairline bg-surface hover:bg-surface-hover hover:border-hairline-strong transition-colors cursor-pointer select-none flex items-center"
                 aria-label="Aksi Cepat Monitor"
               >
                 <span class="text-text-muted">[</span>
@@ -453,6 +481,93 @@ function getActionItems(monitor: MonitorResponseDto) {
           <SkeletonRows :rows="6" :columns="7" />
         </template>
       </UTable>
+    </div>
+
+    <!-- Mobile Card List View (< 768px) DES §9 -->
+    <div class="md:hidden space-y-3" aria-label="Daftar Kartu Monitor">
+      <!-- Loading Skeleton on Mobile -->
+      <div v-if="isLoading" class="space-y-3">
+        <div v-for="i in 3" :key="i" class="border border-hairline bg-surface p-3 space-y-3 animate-pulse">
+          <div class="h-6 bg-surface-elevated w-1/3"></div>
+          <div class="h-4 bg-surface-elevated w-2/3"></div>
+          <div class="h-10 bg-surface-elevated w-full"></div>
+        </div>
+      </div>
+
+      <!-- Empty State on Mobile -->
+      <div v-else-if="monitorsList.length === 0" class="border border-hairline bg-surface p-6">
+        <EmptyState
+          title="TIDAK ADA MONITOR DITEMUKAN"
+          description="Tidak ada monitor yang cocok dengan kriteria pencarian atau status filter saat ini."
+          action-label="+ TAMBAH MONITOR BARU"
+          action-to="/dashboard/monitors/new"
+        />
+      </div>
+
+      <!-- Card Items -->
+      <div
+        v-else
+        v-for="monitor in monitorsList"
+        :key="monitor.id"
+        class="border border-hairline bg-surface p-3 space-y-3 font-mono transition-colors"
+        :class="{
+          'bg-surface-elevated ring-1 ring-brand-accent/50': socket.isFlashing(monitor.id),
+        }"
+      >
+        <!-- Card Header: Status, Method, Quick Ops Button -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5">
+            <StatusBadge :status="monitor.healthStatus" :pulse="socket.isFlashing(monitor.id)" />
+            <HttpMethodBadge :method="monitor.method" />
+          </div>
+          <UDropdownMenu
+            :items="getActionItems(monitor)"
+            :ui="{
+              content: 'font-mono text-xs bg-surface border border-hairline rounded-none shadow-xl min-w-48 py-1 z-50',
+              item: 'font-mono text-xs hover:bg-surface-hover rounded-none px-3 py-2.5 cursor-pointer min-h-[44px]',
+            }"
+          >
+            <button
+              type="button"
+              class="font-mono text-xs px-2.5 py-1 min-h-[44px] rounded-none border border-hairline bg-surface hover:bg-surface-hover hover:border-hairline-strong transition-colors cursor-pointer select-none flex items-center"
+              aria-label="Aksi Cepat Monitor"
+            >
+              <span class="text-text-muted">[</span>
+              <span class="text-text-secondary font-bold">OPS</span>
+              <span class="text-text-muted">]</span>
+            </button>
+          </UDropdownMenu>
+        </div>
+
+        <!-- Monitor Name & URL -->
+        <div>
+          <NuxtLink
+            :to="`/dashboard/monitors/${monitor.id}`"
+            class="font-bold text-sm text-text-primary hover:text-brand-accent transition-colors truncate block min-h-[44px] flex items-center"
+          >
+            {{ monitor.name }}
+          </NuxtLink>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-[11px] text-text-muted truncate select-all flex-1">
+              {{ monitor.url }}
+            </span>
+            <CopyButton :text="monitor.url" size="xs" label="COPY" />
+          </div>
+        </div>
+
+        <!-- Telemetry Row: Uptime, Latency, Last Checked -->
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-hairline text-xs">
+          <div>
+            <span class="text-[10px] text-text-muted block">UPTIME / LATENCY:</span>
+            <span class="font-semibold text-text-primary">{{ computeMonitorMetrics(monitor.sparkline).uptime }}</span>
+            <span class="text-[11px] text-text-secondary ml-1">avg {{ computeMonitorMetrics(monitor.sparkline).avgLatency }}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-text-muted block">LAST CHECKED:</span>
+            <RelativeTime :value="monitor.lastCheckedAt" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Modal Konfirmasi Hapus Destruktif -->
