@@ -34,26 +34,30 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
     });
 
     it("throws SSRFBlockedException for private loopback literal", async () => {
-      expect(resolveDnsWithSsrfCheck("127.0.0.1")).rejects.toThrow(SSRFBlockedException);
-      expect(resolveDnsWithSsrfCheck("::1")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("127.0.0.1")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("::1")).rejects.toThrow(SSRFBlockedException);
     });
 
     it("throws SSRFBlockedException for cloud metadata literal", async () => {
-      expect(resolveDnsWithSsrfCheck("169.254.169.254")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("169.254.169.254")).rejects.toThrow(
+        SSRFBlockedException,
+      );
     });
 
     it("throws SSRFBlockedException for RFC 1918 private literals", async () => {
-      expect(resolveDnsWithSsrfCheck("10.0.0.5")).rejects.toThrow(SSRFBlockedException);
-      expect(resolveDnsWithSsrfCheck("192.168.1.1")).rejects.toThrow(SSRFBlockedException);
-      expect(resolveDnsWithSsrfCheck("172.16.0.1")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("10.0.0.5")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("192.168.1.1")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("172.16.0.1")).rejects.toThrow(SSRFBlockedException);
     });
   });
 
   describe("Localhost validation", () => {
     it("throws SSRFBlockedException for localhost and *.localhost domains", async () => {
-      expect(resolveDnsWithSsrfCheck("localhost")).rejects.toThrow(SSRFBlockedException);
-      expect(resolveDnsWithSsrfCheck("sub.localhost")).rejects.toThrow(SSRFBlockedException);
-      expect(resolveDnsWithSsrfCheck("foo.bar.localhost.")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("localhost")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("sub.localhost")).rejects.toThrow(SSRFBlockedException);
+      await expect(resolveDnsWithSsrfCheck("foo.bar.localhost.")).rejects.toThrow(
+        SSRFBlockedException,
+      );
     });
   });
 
@@ -108,7 +112,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => [],
       };
 
-      expect(resolveDnsWithSsrfCheck("rebinding.example.com", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("rebinding.example.com", mockLookup)).rejects.toThrow(
         SSRFBlockedException,
       );
     });
@@ -119,7 +123,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => ["::1"],
       };
 
-      expect(resolveDnsWithSsrfCheck("loopback-v6.example.com", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("loopback-v6.example.com", mockLookup)).rejects.toThrow(
         SSRFBlockedException,
       );
     });
@@ -130,7 +134,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => ["::ffff:10.0.0.1"],
       };
 
-      expect(resolveDnsWithSsrfCheck("v4mapped.example.com", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("v4mapped.example.com", mockLookup)).rejects.toThrow(
         SSRFBlockedException,
       );
     });
@@ -141,7 +145,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => ["64:ff9b::a00:1"], // 10.0.0.1 embedded
       };
 
-      expect(resolveDnsWithSsrfCheck("nat64.example.com", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("nat64.example.com", mockLookup)).rejects.toThrow(
         SSRFBlockedException,
       );
     });
@@ -152,7 +156,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => ["2002:0a00:0001::"], // 10.0.0.1 embedded
       };
 
-      expect(resolveDnsWithSsrfCheck("6to4.example.com", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("6to4.example.com", mockLookup)).rejects.toThrow(
         SSRFBlockedException,
       );
     });
@@ -169,7 +173,7 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         },
       };
 
-      expect(resolveDnsWithSsrfCheck("nonexistent.domain", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("nonexistent.domain", mockLookup)).rejects.toThrow(
         DnsResolutionException,
       );
     });
@@ -180,13 +184,13 @@ describe("P6.2 — DnsResolver Unit Tests", () => {
         resolve6: async () => [],
       };
 
-      expect(resolveDnsWithSsrfCheck("empty.domain", mockLookup)).rejects.toThrow(
+      await expect(resolveDnsWithSsrfCheck("empty.domain", mockLookup)).rejects.toThrow(
         DnsResolutionException,
       );
     });
 
     it("throws DnsResolutionException when hostname is empty", async () => {
-      expect(resolveDnsWithSsrfCheck("   ")).rejects.toThrow(DnsResolutionException);
+      await expect(resolveDnsWithSsrfCheck("   ")).rejects.toThrow(DnsResolutionException);
     });
   });
 });

@@ -83,4 +83,43 @@ describe("P13.1 — OpenTelemetry Tracer Unit Tests", () => {
       });
     }).not.toThrow();
   });
+
+  it("OtelTelemetryAdapter executes withSpan and records spans", async () => {
+    const { OtelTelemetryAdapter } = await import("../src/telemetry/otel-telemetry.adapter.js");
+    const adapter = new OtelTelemetryAdapter();
+
+    const result = await adapter.withSpan(
+      "adapter.span",
+      { parentTraceparent: generateTraceparent(), attributes: { "app.tier": "infra" } },
+      async () => "span-ok",
+    );
+    expect(result).toBe("span-ok");
+
+    expect(() => {
+      adapter.recordSpan({
+        name: "adapter.child",
+        durationMs: 50,
+        attributes: { "adapter.attr": 123 },
+      });
+      adapter.recordSpan({
+        name: "adapter.child.explicit",
+        startTime: Date.now() - 100,
+        endTime: Date.now(),
+        error: new Error("child error"),
+      });
+    }).not.toThrow();
+  });
+
+  it("initializes active telemetry SDK, reuses existing instance, and shuts down", async () => {
+    const sdk1 = await initTelemetry({ serviceName: "active-service", enabled: true });
+    expect(sdk1).toBeDefined();
+
+    // Second call reuses instance
+    const sdk2 = await initTelemetry({ serviceName: "active-service-2", enabled: true });
+    expect(sdk2).toBe(sdk1);
+
+    await shutdownTelemetry();
+    // Second shutdown is safe and idempotent
+    await shutdownTelemetry();
+  });
 });
