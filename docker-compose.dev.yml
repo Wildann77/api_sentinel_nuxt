@@ -30,8 +30,7 @@ services:
   prometheus-dev:
     image: prom/prometheus:v3.15.1
     container_name: sentinel-prometheus-dev
-    ports:
-      - "9090:9090"
+    network_mode: host
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./infra/prometheus/alerts.yml:/etc/prometheus/alerts.yml
@@ -39,8 +38,6 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--web.enable-lifecycle"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   jaeger-dev:
     image: jaegertracing/all-in-one:1.76.0
