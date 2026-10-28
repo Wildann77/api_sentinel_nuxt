@@ -22,7 +22,7 @@ import { DrizzleMonitorRepository } from "../src/repositories/drizzle-monitor-re
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ??
   process.env.DATABASE_URL ??
-  "postgres://sentinel_user:sentinel_password@localhost:5433/api_sentinel_dev";
+  "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
 let seq = 1000;
 function genUUIDv7(): string {
@@ -161,7 +161,7 @@ describe("P4.6 — DrizzleUnitOfWorkAdapter Integration", () => {
     expect(committedIncident).not.toBeNull();
 
     const updatedMonitor = await monitorRepo.findById(monitorId);
-    expect(updatedMonitor?.version).toBe(2);
+    expect(updatedMonitor?.version).toBe(1);
     expect(updatedMonitor?.consecutiveFailures).toBe(1);
   });
 

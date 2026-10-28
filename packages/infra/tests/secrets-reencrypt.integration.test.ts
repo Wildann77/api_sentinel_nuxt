@@ -13,7 +13,7 @@ import { monitors, notificationConfigs } from "../src/db/schema/index.js";
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ??
   process.env.DATABASE_URL ??
-  "postgres://sentinel_user:sentinel_password@localhost:5433/api_sentinel_dev";
+  "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
 const KEY_1_BASE64 = Buffer.alloc(32, 1).toString("base64");
 const KEY_2_BASE64 = Buffer.alloc(32, 2).toString("base64");
@@ -60,14 +60,18 @@ describe("P5.2 — Secrets Re-encryption Integration Test", () => {
     const monitorId = "018d0000-0000-7000-8000-000000000055";
     const rawHeaders = JSON.stringify({ Authorization: "Bearer legacy-secret-token" });
     const rawBody = '{"query":"secret_payload"}';
+    const rawAuth = JSON.stringify({ type: "bearer", token: "super-secret-auth" });
     const aadHeaders = formatMonitorAad(monitorId, "headers");
     const aadBody = formatMonitorAad(monitorId, "body");
+    const aadAuth = formatMonitorAad(monitorId, "authConfig");
 
     const encHeadersK1 = await oldCipher.encrypt(rawHeaders, aadHeaders);
     const encBodyK1 = await oldCipher.encrypt(rawBody, aadBody);
+    const encAuthK1 = await oldCipher.encrypt(rawAuth, aadAuth);
 
     expect(encHeadersK1.startsWith("v1:k1:")).toBe(true);
     expect(encBodyK1.startsWith("v1:k1:")).toBe(true);
+    expect(encAuthK1.startsWith("v1:k1:")).toBe(true);
 
     await db.insert(monitors).values({
       id: monitorId,
@@ -76,6 +80,7 @@ describe("P5.2 — Secrets Re-encryption Integration Test", () => {
       method: "GET",
       encryptedHeaders: encHeadersK1,
       encryptedBody: encBodyK1,
+      encryptedAuthConfig: encAuthK1,
       isActive: true,
     });
 
@@ -99,19 +104,25 @@ describe("P5.2 — Secrets Re-encryption Integration Test", () => {
 
     expect(summary.monitorsReencrypted).toBe(1);
     expect(summary.notificationConfigsReencrypted).toBe(1);
-    expect(summary.fieldsReencrypted).toBe(3);
+    expect(summary.fieldsReencrypted).toBe(4);
 
     // Verify DB state
     const [updatedMonitor] = await db.select().from(monitors).where(eq(monitors.id, monitorId));
     expect(updatedMonitor.encryptedHeaders?.startsWith("v1:k2:")).toBe(true);
     expect(updatedMonitor.encryptedBody?.startsWith("v1:k2:")).toBe(true);
+    expect(updatedMonitor.encryptedAuthConfig?.startsWith("v1:k2:")).toBe(true);
 
     // Decrypt with newCipher
     expect(updatedMonitor.encryptedHeaders).toBeDefined();
     expect(updatedMonitor.encryptedBody).toBeDefined();
+    expect(updatedMonitor.encryptedAuthConfig).toBeDefined();
 
-    if (!updatedMonitor.encryptedHeaders || !updatedMonitor.encryptedBody) {
-      throw new Error("Expected encrypted headers and body to be defined on monitor");
+    if (
+      !updatedMonitor.encryptedHeaders ||
+      !updatedMonitor.encryptedBody ||
+      !updatedMonitor.encryptedAuthConfig
+    ) {
+      throw new Error("Expected encrypted fields to be defined on monitor");
     }
 
     const decryptedHeaders = await newCipher.decrypt(updatedMonitor.encryptedHeaders, aadHeaders);
@@ -119,6 +130,9 @@ describe("P5.2 — Secrets Re-encryption Integration Test", () => {
 
     const decryptedBody = await newCipher.decrypt(updatedMonitor.encryptedBody, aadBody);
     expect(decryptedBody).toBe(rawBody);
+
+    const decryptedAuth = await newCipher.decrypt(updatedMonitor.encryptedAuthConfig, aadAuth);
+    expect(decryptedAuth).toBe(rawAuth);
 
     const [updatedConfig] = await db
       .select()

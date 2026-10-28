@@ -8,7 +8,7 @@ import {
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ??
   process.env.DATABASE_URL ??
-  "postgres://sentinel_user:sentinel_password@localhost:5433/api_sentinel_dev";
+  "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
 describe("P5.6 — PgListenNotifyAdapter Integration Test", () => {
   let pool: ReturnType<typeof createPgPool>;
@@ -191,6 +191,43 @@ describe("P5.6 — PgListenNotifyAdapter Integration Test", () => {
 
     expect(received).toContain(postReconnectMsg);
 
+    await adapter.close();
+  });
+
+  it("validates channel names and protects against failing message handlers", async () => {
+    const adapter = new PgListenNotifyAdapter({
+      pool,
+      connectionConfig: { connectionString: TEST_DB_URL },
+    });
+
+    // Invalid channel name throws
+    await expect(adapter.subscribe("invalid channel!", () => {})).rejects.toThrow(
+      /Invalid PostgreSQL LISTEN\/NOTIFY channel name/,
+    );
+    await expect(adapter.publish("invalid channel!", "data")).rejects.toThrow(
+      /Invalid PostgreSQL LISTEN\/NOTIFY channel name/,
+    );
+
+    // Handler throwing does not crash listener
+    let normalHandlerCalled = false;
+    await adapter.subscribe("guard_test_channel", () => {
+      throw new Error("Deliberate handler explosion");
+    });
+    await adapter.subscribe("guard_test_channel", () => {
+      normalHandlerCalled = true;
+    });
+
+    await adapter.publish("guard_test_channel", "ping");
+
+    for (let i = 0; i < 20; i++) {
+      if (normalHandlerCalled) break;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+
+    expect(normalHandlerCalled).toBe(true);
+
+    // Double close is safe & idempotent
+    await adapter.close();
     await adapter.close();
   });
 });

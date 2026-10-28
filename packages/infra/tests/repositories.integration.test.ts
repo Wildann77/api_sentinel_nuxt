@@ -36,7 +36,7 @@ import { DrizzleUserRepository } from "../src/repositories/drizzle-user-reposito
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ??
   process.env.DATABASE_URL ??
-  "postgres://sentinel_user:sentinel_password@localhost:5433/api_sentinel_dev";
+  "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
 describe("P4.5 — Drizzle Repositories Integration", () => {
   let pool: ReturnType<typeof createPgPool>;
@@ -275,6 +275,30 @@ describe("P4.5 — Drizzle Repositories Integration", () => {
       const searchResult = await monitorRepo.findWithFilter({ search: "Service 3" });
       expect(searchResult.items).toHaveLength(1);
       expect(searchResult.items[0].name).toBe("Service 3");
+
+      // Status filter ALL vs specific
+      const allStatus = await monitorRepo.findWithFilter({ status: "ALL" });
+      expect(allStatus.items.length).toBeGreaterThanOrEqual(5);
+
+      const specificStatus = await monitorRepo.findWithFilter({ status: "UNKNOWN" });
+      expect(specificStatus.items.length).toBeGreaterThanOrEqual(5);
+
+      // Active filter
+      const activeOnly = await monitorRepo.findWithFilter({ isActive: true });
+      expect(activeOnly.items.length).toBeGreaterThanOrEqual(5);
+
+      const inactiveOnly = await monitorRepo.findWithFilter({ isActive: false });
+      expect(inactiveOnly.items).toHaveLength(0);
+
+      // findAllActive & findDueMonitors & findAll
+      const allActive = await monitorRepo.findAllActive();
+      expect(allActive.length).toBeGreaterThanOrEqual(5);
+
+      const all = await monitorRepo.findAll();
+      expect(all.length).toBeGreaterThanOrEqual(5);
+
+      const due = await monitorRepo.findDueMonitors(new Date(Date.now() + 100000), 10);
+      expect(due.length).toBeGreaterThanOrEqual(5);
     });
   });
 
@@ -375,6 +399,33 @@ describe("P4.5 — Drizzle Repositories Integration", () => {
       const results = await checkResultRepo.findByMonitorId(monitorId, 3);
       expect(results).toHaveLength(3);
 
+      // Find by monitor ID with from, to and cursor
+      const filteredResults = await checkResultRepo.findByMonitorId(
+        monitorId,
+        2,
+        undefined,
+        new Date(now - 10 * 60000),
+        new Date(now + 60000),
+      );
+      expect(filteredResults).toHaveLength(2);
+
+      const cursorResults = await checkResultRepo.findByMonitorId(
+        monitorId,
+        2,
+        results[0].id.toString(),
+      );
+      expect(cursorResults.length).toBeGreaterThan(0);
+
+      // findRecent & findByIncidentId & findById
+      const recent = await checkResultRepo.findRecent(3);
+      expect(recent).toHaveLength(3);
+
+      const byInc = await checkResultRepo.findByIncidentId("018d0000-0000-7000-8000-000000000999");
+      expect(byInc).toHaveLength(0);
+
+      const single = await checkResultRepo.findById(results[0].id);
+      expect(single?.id.toString()).toBe(results[0].id.toString());
+
       // Stream checks
       const streamed: CheckResult[] = [];
       for await (const c of checkResultRepo.streamChecks({
@@ -385,6 +436,22 @@ describe("P4.5 — Drizzle Repositories Integration", () => {
         streamed.push(c);
       }
       expect(streamed).toHaveLength(5);
+
+      // Check not found edge cases
+      expect(await checkResultRepo.findById("018d0000-0000-7000-8000-000000000999")).toBeNull();
+      expect(await incidentRepo.findById("018d0000-0000-7000-8000-000000000999")).toBeNull();
+      expect(await monitorRepo.findById("018d0000-0000-7000-8000-000000000999")).toBeNull();
+      expect(await userRepo.findById("018d0000-0000-7000-8000-000000000999")).toBeNull();
+      expect(await userRepo.findByUsername("nonexistent")).toBeNull();
+
+      // updateNextRun
+      const nextDate = new Date(now + 120000);
+      await monitorRepo.updateNextRun(monitorId, nextDate);
+      const updatedMon = await monitorRepo.findById(monitorId);
+      expect(updatedMon?.nextRunAt.toISOString()).toBe(nextDate.toISOString());
+
+      // delete non-existent monitor returns false
+      expect(await monitorRepo.delete("018d0000-0000-7000-8000-000000000999")).toBe(false);
     });
   });
 

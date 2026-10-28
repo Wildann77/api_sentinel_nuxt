@@ -11,7 +11,7 @@ import {
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ??
   process.env.DATABASE_URL ??
-  "postgres://sentinel_user:sentinel_password@localhost:5433/api_sentinel_dev";
+  "postgres://sentinel_user:sentinel_password@localhost:5432/api_sentinel_dev";
 
 class TestClock {
   public currentTime: Date;
